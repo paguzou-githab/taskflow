@@ -219,6 +219,7 @@ body{font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;background:var(
 /* テンプレート */
 .tmpl-wrap{padding:14px 14px 100px;}
 .tmpl-card{background:#fff;border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,0.08);overflow:hidden;margin-bottom:10px;}
+.tmpl-card.dragging{opacity:0.4;}
 .tmpl-card.color-red{background:#ffd6d6;}
 .tmpl-card.color-orange{background:#ffe3c9;}
 .tmpl-card.color-yellow{background:#fff3c4;}
@@ -805,6 +806,51 @@ function saveTmpl(){
   saveT();hideTmplForm();renderTmplView();
 }
 
+// ---- テンプレート並び替え: PCドラッグ ----
+let tDragIndex=null;
+function tDragStart(e,i){tDragIndex=i;e.dataTransfer.effectAllowed='move';}
+function tDragOver(e,i){e.preventDefault();}
+function tDrop(e,i){
+  e.preventDefault();
+  if(tDragIndex===null||tDragIndex===i)return;
+  tmplReorder(tDragIndex,i);tDragIndex=null;
+}
+function tDragEnd(){tDragIndex=null;}
+
+// ---- テンプレート並び替え: タッチドラッグ ----
+let tTouchIndex=null, tTouchClone=null;
+function tTouchStart(e,i){
+  tTouchIndex=i;
+  const row=e.currentTarget.closest('.tmpl-card');
+  const rect=row.getBoundingClientRect();
+  tTouchClone=row.cloneNode(true);
+  tTouchClone.style.cssText=`position:fixed;left:${rect.left}px;top:${rect.top}px;width:${rect.width}px;opacity:0.8;z-index:999;pointer-events:none;box-shadow:0 6px 16px rgba(0,0,0,0.2);`;
+  document.body.appendChild(tTouchClone);
+  row.classList.add('dragging');
+}
+function tTouchMove(e){
+  if(tTouchIndex===null)return;
+  e.preventDefault();
+  const y=e.touches[0].clientY;
+  if(tTouchClone)tTouchClone.style.top=(y-20)+'px';
+  let over=null;
+  templates.forEach((tm,i)=>{
+    const el=document.getElementById('trow-'+tm.id);if(!el)return;
+    const r=el.getBoundingClientRect();
+    if(y>=r.top&&y<=r.bottom)over=i;
+  });
+  if(over!==null&&over!==tTouchIndex){tmplReorder(tTouchIndex,over);tTouchIndex=over;}
+}
+function tTouchEnd(){
+  if(tTouchClone){tTouchClone.remove();tTouchClone=null;}
+  tTouchIndex=null;
+  document.querySelectorAll('.tmpl-card').forEach(r=>r.classList.remove('dragging'));
+}
+function tmplReorder(from,to){
+  const[moved]=templates.splice(from,1);templates.splice(to,0,moved);
+  saveT();renderTmplView();
+}
+
 // ---- Picker HTML ----
 function pickerHTML(val,ctx){
   const btns=PRESETS.map(pr=>`<button class="preset-btn${val===pr?' active':''}" onclick="setPickerVal(${pr},'${ctx}')">${pr}分</button>`).join('');
@@ -969,10 +1015,12 @@ function renderTaskList(){
 function renderTmplView(){
   const view=document.getElementById('tmpl-view');
   if(!templates.length){view.innerHTML='<div class="tmpl-wrap"><div class="empty">テンプレートがありません<br>＋ボタンで追加してください</div></div>';return;}
-  let html='<div class="tmpl-wrap">';
-  templates.forEach(tm=>{
-    html+=`<div class="tmpl-card${colorCls(tm.color)}">
+  let html='<div class="tmpl-wrap"><div class="reorder-hint">⠿ ドラッグで並び替え（ピッカーにも同じ順で表示されます）</div>';
+  templates.forEach((tm,i)=>{
+    html+=`<div class="tmpl-card${colorCls(tm.color)}" id="trow-${tm.id}" draggable="true"
+      ondragstart="tDragStart(event,${i})" ondragover="tDragOver(event,${i})" ondrop="tDrop(event,${i})" ondragend="tDragEnd()">
       <div class="tmpl-inner">
+        <div class="reorder-handle" ontouchstart="tTouchStart(event,${i})" ontouchmove="tTouchMove(event)" ontouchend="tTouchEnd()">⠿</div>
         <div class="tmpl-info"><div class="tmpl-name">${esc(tm.name)}</div><div class="tmpl-sub">⏰ ${tm.estimate}分</div></div>
         <div class="tmpl-actions">
           <button class="btn btn-start" onclick="addFromTemplate(${tm.id})" title="今日に追加" style="font-size:22px">＋</button>
