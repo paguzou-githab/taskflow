@@ -19,8 +19,7 @@ body{font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;background:var(
 /* ヘッダー */
 .header{background:linear-gradient(135deg,var(--dark),var(--dark2));color:#fff;padding:20px 20px 0;position:sticky;top:0;z-index:100;box-shadow:0 2px 16px rgba(0,0,0,0.4);}
 .header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
-.logo{font-size:20px;font-weight:800;letter-spacing:1px;color:var(--teal);display:flex;align-items:center;gap:6px;}
-.backup-btn{background:rgba(255,255,255,0.12);border:none;border-radius:8px;font-size:14px;padding:4px 9px;cursor:pointer;line-height:1;}
+.logo{font-size:20px;font-weight:800;letter-spacing:1px;color:var(--teal);}
 .clock{font-size:34px;font-weight:200;letter-spacing:3px;font-variant-numeric:tabular-nums;}
 .end-badge{background:rgba(78,205,196,0.12);border:1px solid rgba(78,205,196,0.35);border-radius:10px;padding:8px 14px;font-size:15px;display:flex;align-items:center;gap:8px;color:#b2eeeb;margin-bottom:14px;flex-wrap:wrap;}
 .end-badge strong{color:#fff;font-size:17px;}
@@ -47,14 +46,9 @@ body{font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;background:var(
 .card.paused{box-shadow:0 0 0 2.5px var(--yellow),0 2px 10px rgba(249,202,36,0.2);}
 .card.done{opacity:0.55;background:#f7f7f7;}
 .card.drag-over{transform:scale(1.02);box-shadow:0 0 0 2.5px var(--teal),0 8px 24px rgba(78,205,196,0.3);}
-.card.color-red   {background:#ffd6d6;}
-.card.color-orange{background:#ffe3c9;}
-.card.color-yellow{background:#fff3c4;}
-.card.color-green {background:#c8f5d8;}
-.card.color-blue  {background:#d0e8ff;}
-.card.color-purple{background:#e5d9ff;}
-.card.color-pink  {background:#ffd9ec;}
-.card.color-gray  {background:#e3e6ea;}
+.card.color-red  {background:#ffd6d6;}
+.card.color-blue {background:#d0e8ff;}
+.card.color-green{background:#c8f5d8;}
 .card.sort-mode{cursor:grab;box-shadow:0 2px 8px rgba(0,0,0,0.08);}
 .card.sort-mode:active{cursor:grabbing;}
 
@@ -83,18 +77,13 @@ body{font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;background:var(
 .preset-btn.active{background:var(--teal);color:#fff;border-color:var(--teal);}
 
 /* カラーピッカー */
-.color-picker{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap;}
+.color-picker{display:flex;align-items:center;gap:12px;margin-top:10px;flex-wrap:wrap;}
 .color-btn{width:38px;height:38px;border-radius:50%;border:3px solid transparent;cursor:pointer;transition:transform 0.15s,border-color 0.15s;flex-shrink:0;}
 .color-btn.active{border-color:#333;transform:scale(1.18);}
 .color-btn.c-none{background:#fff;border:3px solid #ccc;}
 .color-btn.c-red{background:#ffaaaa;}
-.color-btn.c-orange{background:#ffb26b;}
-.color-btn.c-yellow{background:#ffd93d;}
-.color-btn.c-green{background:#5dd98a;}
 .color-btn.c-blue{background:#7ab8ff;}
-.color-btn.c-purple{background:#b28aff;}
-.color-btn.c-pink{background:#ff9ecd;}
-.color-btn.c-gray{background:#b0b8c1;}
+.color-btn.c-green{background:#5dd98a;}
 
 /* ボタン */
 .btn-group{display:flex;gap:6px;flex-shrink:0;}
@@ -119,18 +108,13 @@ body{font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;background:var(
 .insert-bar:active{background:#eef2f7;color:#666;}
 .reorder-row{display:flex;align-items:center;gap:10px;background:#fff;border-radius:10px;padding:8px 10px;box-shadow:0 1px 4px rgba(0,0,0,0.06);}
 .reorder-row.color-red{background:#ffd6d6;}
-.reorder-row.color-orange{background:#ffe3c9;}
-.reorder-row.color-yellow{background:#fff3c4;}
-.reorder-row.color-green{background:#c8f5d8;}
 .reorder-row.color-blue{background:#d0e8ff;}
-.reorder-row.color-purple{background:#e5d9ff;}
-.reorder-row.color-pink{background:#ffd9ec;}
-.reorder-row.color-gray{background:#e3e6ea;}
+.reorder-row.color-green{background:#c8f5d8;}
 .reorder-row.dragging{opacity:0.4;}
 .reorder-row.drag-over{box-shadow:0 0 0 2px var(--teal);}
 .reorder-handle{font-size:18px;color:#ccc;flex-shrink:0;touch-action:none;line-height:1;}
 .reorder-num{font-size:12px;color:#aaa;width:20px;flex-shrink:0;text-align:center;font-weight:700;}
-.reorder-name{flex:1;min-width:0;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;}
+.reorder-name{flex:1;min-width:0;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .reorder-est{font-size:12px;color:#999;flex-shrink:0;}
 
 /* 実績時間編集 */
@@ -142,15 +126,11 @@ body{font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;background:var(
 .tmpl-pick-sheet{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:540px;max-height:75vh;overflow-y:auto;padding:20px;}
 .tmpl-pick-title{font-size:17px;font-weight:800;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;}
 .tmpl-pick-close{border:none;background:#eef0f3;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;color:#888;}
-.tmpl-pick-item{display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;margin-bottom:8px;cursor:pointer;background:#f7f9fc;}
+.tmpl-pick-item{display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;margin-bottom:8px;cursor:pointer;}
 .tmpl-pick-item.color-red{background:#ffd6d6;}
-.tmpl-pick-item.color-orange{background:#ffe3c9;}
-.tmpl-pick-item.color-yellow{background:#fff3c4;}
-.tmpl-pick-item.color-green{background:#c8f5d8;}
 .tmpl-pick-item.color-blue{background:#d0e8ff;}
-.tmpl-pick-item.color-purple{background:#e5d9ff;}
-.tmpl-pick-item.color-pink{background:#ffd9ec;}
-.tmpl-pick-item.color-gray{background:#e3e6ea;}
+.tmpl-pick-item.color-green{background:#c8f5d8;}
+.tmpl-pick-item:not(.color-red):not(.color-blue):not(.color-green){background:#f7f9fc;}
 .tmpl-pick-info{flex:1;min-width:0;}
 .tmpl-pick-name{font-size:15px;font-weight:700;}
 .tmpl-pick-sub{font-size:12px;color:#888;}
@@ -204,43 +184,13 @@ body{font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;background:var(
 .avg-name{font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px;}
 .avg-row{display:flex;gap:16px;font-size:13px;color:#888;flex-wrap:wrap;}
 .avg-val{font-weight:700;color:var(--dark);}
-.avg-card.color-red{background:#ffd6d6;}
-.avg-card.color-orange{background:#ffe3c9;}
-.avg-card.color-yellow{background:#fff3c4;}
-.avg-card.color-green{background:#c8f5d8;}
-.avg-card.color-blue{background:#d0e8ff;}
-.avg-card.color-purple{background:#e5d9ff;}
-.avg-card.color-pink{background:#ffd9ec;}
-.avg-card.color-gray{background:#e3e6ea;}
-.color-dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px;vertical-align:-1px;flex-shrink:0;}
-.reorder-add{border:none;background:#eef2f7;color:#666;border-radius:8px;width:32px;height:32px;font-size:17px;font-weight:800;cursor:pointer;flex-shrink:0;line-height:1;}
-.reorder-add:active{background:var(--teal);color:#fff;}
-.reorder-del{border:none;background:#fef0f0;color:#e74c3c;border-radius:8px;width:32px;height:32px;font-size:15px;font-weight:800;cursor:pointer;flex-shrink:0;line-height:1;}
-.reorder-del:active{background:#e74c3c;color:#fff;}
-.reorder-row.selected{box-shadow:0 0 0 2.5px var(--teal),0 2px 8px rgba(0,0,0,0.06);background:#eafffb;}
-.reorder-checkbox{width:22px;height:22px;flex-shrink:0;accent-color:var(--teal);cursor:pointer;}
-.select-toggle-btn{border:none;background:#eef2f7;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;color:#555;cursor:pointer;white-space:nowrap;}
-.select-toggle-btn.active{background:var(--teal);color:#fff;}
-.reorder-toolbar{display:flex;align-items:center;justify-content:space-between;padding:4px 4px 12px;gap:8px;}
-.batch-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:540px;background:#fff;border-top:1px solid var(--border);padding:14px 16px;box-shadow:0 -6px 24px rgba(0,0,0,0.12);z-index:210;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-.batch-bar-label{font-size:13px;font-weight:800;color:var(--dark);margin-right:auto;}
-.batch-btn{border:none;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:700;cursor:pointer;}
-.batch-btn-move{background:#eef2f7;color:#444;}
-.batch-btn-del{background:#fef0f0;color:#e74c3c;}
-.batch-btn-cancel{background:#f0f0f0;color:#888;}
 
 /* テンプレート */
 .tmpl-wrap{padding:14px 14px 100px;}
 .tmpl-card{background:#fff;border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,0.08);overflow:hidden;margin-bottom:10px;}
-.tmpl-card.dragging{opacity:0.4;}
 .tmpl-card.color-red{background:#ffd6d6;}
-.tmpl-card.color-orange{background:#ffe3c9;}
-.tmpl-card.color-yellow{background:#fff3c4;}
-.tmpl-card.color-green{background:#c8f5d8;}
 .tmpl-card.color-blue{background:#d0e8ff;}
-.tmpl-card.color-purple{background:#e5d9ff;}
-.tmpl-card.color-pink{background:#ffd9ec;}
-.tmpl-card.color-gray{background:#e3e6ea;}
+.tmpl-card.color-green{background:#c8f5d8;}
 .tmpl-inner{display:flex;align-items:center;padding:14px;gap:10px;}
 .tmpl-info{flex:1;min-width:0;}
 .tmpl-name{font-size:17px;font-weight:700;color:var(--text);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -253,7 +203,7 @@ body{font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;background:var(
 <div id="app">
   <div class="header">
     <div class="header-top">
-      <span class="logo">⏱ TaskFlow <button class="backup-btn" onclick="openBackup()" title="バックアップ / 復元">💾</button></span>
+      <span class="logo">⏱ TaskFlow</span>
       <span class="clock" id="clock">00:00</span>
     </div>
     <div class="end-badge" id="end-badge">
@@ -288,7 +238,7 @@ body{font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;background:var(
     <div id="add-color-picker"></div>
     <div class="add-actions">
       <button class="btn-wide btn-delete" onclick="hideAddForm()">キャンセル</button>
-      <button class="btn-wide btn-start" id="add-submit" onclick="addTask()">追加</button>
+      <button class="btn-wide btn-start"  onclick="addTask()">追加</button>
     </div>
   </div>
 
@@ -330,20 +280,6 @@ body{font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;background:var(
     </div>
   </div>
 
-  <!-- バックアップ / 復元ダイアログ -->
-  <div class="dialog-overlay" id="backup-dialog" style="display:none">
-    <div class="dialog">
-      <div class="dialog-title">💾 バックアップ / 復元</div>
-      <div class="dialog-body">下のデータを丸ごとコピーして、メモ帳やメールなど安全な場所に保管してください。<br>復元するときは保管したデータを貼り付けて「読み込む」を押します。<br><strong style="color:#e74c3c">※読み込むと現在のデータは上書きされます。</strong></div>
-      <textarea id="backup-text" spellcheck="false" style="width:100%;height:110px;border:1.5px solid var(--border);border-radius:10px;padding:10px;font-size:12px;font-family:monospace;resize:none;outline:none;"></textarea>
-      <div class="dialog-actions" style="margin-top:14px;flex-wrap:wrap">
-        <button class="btn-wide btn-reset" onclick="closeBackup()" style="height:44px;padding:0 16px;font-size:14px">閉じる</button>
-        <button class="btn-wide btn-pause" onclick="importBackup()" style="height:44px;padding:0 16px;font-size:14px">読み込む</button>
-        <button class="btn-wide btn-start" id="copy-btn" onclick="copyBackup()" style="height:44px;padding:0 16px;font-size:14px">📋 コピー</button>
-      </div>
-    </div>
-  </div>
-
   <!-- テンプレートピッカー -->
   <div class="tmpl-pick-overlay" id="tmpl-pick-overlay" style="display:none" onclick="if(event.target===this)closeTmplPicker()">
     <div class="tmpl-pick-sheet">
@@ -359,15 +295,10 @@ body{font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;background:var(
 const SK='taskflow:v4', SKT='taskflow:tmpls', SKH='taskflow:history', SKBG='taskflow:bg';
 const PRESETS=[5,10,15,30,60,90];
 const COLORS=[
-  {key:'none',  label:'なし',    cls:'c-none'},
-  {key:'red',   label:'赤',      cls:'c-red'},
-  {key:'orange',label:'オレンジ',cls:'c-orange'},
-  {key:'yellow',label:'黄',      cls:'c-yellow'},
-  {key:'green', label:'緑',      cls:'c-green'},
-  {key:'blue',  label:'青',      cls:'c-blue'},
-  {key:'purple',label:'紫',      cls:'c-purple'},
-  {key:'pink',  label:'ピンク',  cls:'c-pink'},
-  {key:'gray',  label:'グレー',  cls:'c-gray'},
+  {key:'none',label:'なし',cls:'c-none'},
+  {key:'red', label:'赤', cls:'c-red'},
+  {key:'blue',label:'青', cls:'c-blue'},
+  {key:'green',label:'緑',cls:'c-green'},
 ];
 
 let tasks=[], nextId=100, activeId=null;
@@ -381,15 +312,7 @@ let bgElapsed=0, bgTaskId=null; // バックグラウンド用
 let selectedDate=null; // 実績タブの選択日付
 let startTime=null; // 今日の開始時刻 "HH:MM" or null（現在時刻使用）
 let insertAfterId=null; // 並び替えタブで「ここに追加」した挿入位置
-let selectMode=false; // 並び替えタブ：複数選択モード
-let selectedIds=new Set(); // 並び替えタブ：選択中のタスクID
 let editingElapsedId=null; // 実績時間編集中のタスクID
-let editingNameId=null, editingNameOriginal=''; // 名前編集中のタスクIDと元の名前
-let editTaskId=null; // 追加フォームを「編集モード」で使う際の対象タスクID
-let crashBg=null; // 実行中のまま異常終了していた場合の復帰情報 {taskId,time}
-let lastDay=todayStr(); // 日付跨ぎ検知用
-const COLOR_DOT={none:'#ccc',red:'#ff6b6b',orange:'#ff9f43',yellow:'#f9ca24',green:'#5dd98a',blue:'#7ab8ff',purple:'#a55eea',pink:'#ff6b9d',gray:'#95a5a6'};
-const CAT_LABEL={none:'未分類',red:'赤',orange:'オレンジ',yellow:'黄',green:'緑',blue:'青',purple:'紫',pink:'ピンク',gray:'グレー'};
 
 // ---- Storage ----
 function todayStr(){const d=new Date();return`${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;}
@@ -399,36 +322,19 @@ function saveH(){try{localStorage.setItem(SKH,JSON.stringify(history));}catch(e)
 
 function load(){
   try{
-    const raw=localStorage.getItem(SK);
-    const d=JSON.parse(raw||'{}');
+    const d=JSON.parse(localStorage.getItem(SK)||'{}');
     const today=todayStr();
-    if(raw&&Array.isArray(d.tasks)){
-      if(d.date===today){
-        // 同日：そのまま復元（実行中だったものは一時停止に）
-        tasks=d.tasks.map(t=>{
-          const nt={...t};
-          if(nt.status==='running'){
-            // 実行中のまま終了していた（visibilitychange未発火＝クラッシュ等）
-            if(nt.startedAt&&!localStorage.getItem(SKBG))crashBg={taskId:nt.id,time:nt.startedAt};
-            nt.status='paused';
-          }
-          nt.startedAt=null;
-          return nt;
-        });
-        nextId=d.nextId||100;
-        startTime=d.startTime||null;
-        return;
-      }else{
-        // 日付替わり：完了をアーカイブし、未完了は実績リセットして翌日へ繰り越し
-        archiveDay(d.date, d.tasks);
-        tasks=d.tasks.filter(t=>t.status!=='done').map(t=>({...t,status:'idle',elapsed:0,startedAt:null}));
-        nextId=d.nextId||100;
-        startTime=null; // 新しい日なので開始時刻はリセット
-        return;
-      }
+    // 日付が変わっていたら前日分をアーカイブ
+    if(d.date && d.date!==today && Array.isArray(d.tasks)){
+      archiveDay(d.date, d.tasks);
+    }
+    if(Array.isArray(d.tasks)&&d.tasks.length&&d.date===today){
+      tasks=d.tasks.map(t=>t.status==='running'?{...t,status:'paused'}:t);
+      nextId=d.nextId||100;
+      startTime=d.startTime||null;
+      return;
     }
   }catch(e){}
-  // 初回起動のときだけサンプルを投入
   tasks=[
     {id:1,name:'メールチェック',   estimate:15,elapsed:0,status:'idle',color:'none'},
     {id:2,name:'朝礼・ミーティング',estimate:30,elapsed:0,status:'idle',color:'none'},
@@ -445,72 +351,36 @@ function loadH(){
 function archiveDay(dateStr, dayTasks){
   loadH();
   const done=dayTasks.filter(t=>t.status==='done'&&t.elapsed>0);
-  // archiveTodayが既にその日を書いている場合があるため、concatせず上書き（二重計上防止）
-  if(done.length)history[dateStr]=done.map(t=>({name:t.name,estimate:t.estimate,elapsed:t.elapsed,color:t.color||'none'}));
-  else delete history[dateStr];
-  saveH();
+  if(done.length){
+    history[dateStr]=(history[dateStr]||[]).concat(done.map(t=>({name:t.name,estimate:t.estimate,elapsed:t.elapsed})));
+    saveH();
+  }
 }
-
-// ---- バックアップ / 復元 ----
-function openBackup(){
-  const data={v:4,tasks,nextId,templates,nextTmplId,history,startTime,date:todayStr()};
-  document.getElementById('backup-text').value=JSON.stringify(data);
-  document.getElementById('copy-btn').textContent='📋 コピー';
-  document.getElementById('backup-dialog').style.display='flex';
-}
-function closeBackup(){document.getElementById('backup-dialog').style.display='none';}
-function copyBackup(){
-  const ta=document.getElementById('backup-text');
-  ta.focus();ta.select();ta.setSelectionRange(0,99999);
-  const done=()=>{document.getElementById('copy-btn').textContent='✓ コピーしました';};
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(ta.value).then(done,()=>{try{document.execCommand('copy');done();}catch(e){}});
-  }else{try{document.execCommand('copy');done();}catch(e){}}
-}
-function importBackup(){
-  const txt=document.getElementById('backup-text').value.trim();
-  if(!txt){alert('データが空です。復元するデータを貼り付けてください。');return;}
-  let d;
-  try{d=JSON.parse(txt);}catch(e){alert('読み込めませんでした。データ形式が正しくありません。');return;}
-  if(!d||!Array.isArray(d.tasks)){alert('読み込めませんでした。タスクデータが見つかりません。');return;}
-  if(!confirm('現在のデータを上書きして復元します。よろしいですか？'))return;
-  tasks=d.tasks.map(t=>({...t,status:t.status==='running'?'paused':t.status,startedAt:null}));
-  nextId=typeof d.nextId==='number'?d.nextId:nextId;
-  if(Array.isArray(d.templates))templates=d.templates;
-  if(typeof d.nextTmplId==='number')nextTmplId=d.nextTmplId;
-  if(d.history&&typeof d.history==='object')history=d.history;
-  startTime=('startTime' in d)?d.startTime:null;
-  activeId=null;
-  save();saveT();saveH();
-  closeBackup();renderAll();
-  alert('復元しました。');
-}
-
-// ---- タイマー計測ヘルパー（タイムスタンプ差分方式） ----
-// 実行中タスクは startedAt(ms) を持ち、表示用実績は「確定分 + 経過差分」で計算する。
-// これにより setInterval の間引きや遅延があっても実績がずれない。
-function curElapsed(t){return t.elapsed+(t.startedAt?(Date.now()-t.startedAt)/60000:0);}
-function settle(t){if(t&&t.startedAt){t.elapsed=curElapsed(t);t.startedAt=null;}}
 
 // ---- バックグラウンド対策 ----
+function saveBgTime(){
+  if(activeId!==null){
+    try{localStorage.setItem(SKBG,JSON.stringify({taskId:activeId,time:Date.now()}));}catch(e){}
+  }else{
+    try{localStorage.removeItem(SKBG);}catch(e){}
+  }
+}
 function checkBgTime(){
-  let rec=null;
   try{
     const raw=localStorage.getItem(SKBG);
-    if(raw){rec=JSON.parse(raw);localStorage.removeItem(SKBG);}
+    if(!raw)return;
+    const d=JSON.parse(raw);
+    const elapsed=(Date.now()-d.time)/1000/60; // 分
+    localStorage.removeItem(SKBG);
+    if(elapsed<0.5)return; // 30秒未満は無視
+    const t=tasks.find(t=>t.id===d.taskId);
+    if(!t)return;
+    bgTaskId=d.taskId;
+    bgElapsed=elapsed;
+    document.getElementById('bg-dialog-body').innerHTML=
+      `「<strong>${esc(t.name)}</strong>」を実行中にアプリを閉じていました。<br><br>経過時間 <strong>${Math.round(elapsed)}分</strong> を実績に追加しますか？`;
+    document.getElementById('bg-dialog').style.display='flex';
   }catch(e){}
-  if(!rec&&crashBg)rec=crashBg; // クラッシュ復帰（startedAt残存）ケース
-  crashBg=null;
-  if(!rec)return;
-  const elapsed=(Date.now()-rec.time)/1000/60; // 分
-  if(elapsed<0.5)return; // 30秒未満は無視
-  const t=tasks.find(t=>t.id===rec.taskId);
-  if(!t)return;
-  bgTaskId=rec.taskId;
-  bgElapsed=elapsed;
-  document.getElementById('bg-dialog-body').innerHTML=
-    `「<strong>${esc(t.name)}</strong>」を実行中にアプリを閉じていました。<br><br>経過時間 <strong>${Math.round(elapsed)}分</strong> を実績に追加しますか？`;
-  document.getElementById('bg-dialog').style.display='flex';
 }
 function bgDialogYes(){
   const t=tasks.find(t=>t.id===bgTaskId);
@@ -557,7 +427,7 @@ function fmtMin(m){const h=Math.floor(m/60),mm=Math.round(m%60);return h>0?`${h}
 function p(n){return String(n).padStart(2,'0');}
 function hhMM(d){return`${p(d.getHours())}:${p(d.getMinutes())}`;}
 function rateColor(r){return r>=0.9?'#6bcb77':r>=0.6?'#f9ca24':'#ff6b6b';}
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function colorCls(c){return c&&c!=='none'?' color-'+c:'';}
 function fmtDate(str){
   const[y,m,d]=str.split('-');
@@ -569,60 +439,30 @@ function fmtDate(str){
 // ---- Clock ----
 setInterval(()=>{
   document.getElementById('clock').textContent=hhMM(new Date());
-  // アプリを開いたまま日付を跨いだ場合のロールオーバー（二重計上防止）
-  if(todayStr()!==lastDay){rolloverDay();lastDay=todayStr();}
   if(activeId!==null){
-    // 実績はstartedAtからの差分計算なので、ここでは再描画のみ（保存も不要）
-    // 名前・実績を編集中は全再描画を避け、ヘッダーのみ更新（入力中の値が消えないように）
-    if(editingElapsedId===null&&editingNameId===null)renderAll();else renderHeader();
+    const t=tasks.find(t=>t.id===activeId);
+    if(t){t.elapsed+=1/60;save();saveBgTime();if(editingElapsedId===null)renderAll();else renderHeader();}
   }
 },1000);
 
-// アプリを開いたまま日付が変わった時の処理（load()の日替わり処理と同等）
-function rolloverDay(){
-  archiveDay(lastDay,tasks); // 完了分を前日の実績として確定
-  tasks=tasks.filter(t=>t.status!=='done').map(t=>({
-    ...t,elapsed:0,
-    // 実行中タスクはリセット後も継続（0時以降の分だけ新しい日にカウント）
-    startedAt:t.status==='running'?Date.now():null
-  }));
-  startTime=null;
-  selectedDate=null;
-  save();renderAll();
-}
-
 // ---- visibilitychange: バックグラウンド検知 ----
 document.addEventListener('visibilitychange',()=>{
-  if(document.hidden){
-    if(activeId!==null){
-      const t=tasks.find(x=>x.id===activeId);
-      if(t){settle(t);save();} // ここまでの実績を確定
-      try{localStorage.setItem(SKBG,JSON.stringify({taskId:activeId,time:Date.now()}));}catch(e){}
-    }
-  }else{
-    checkBgTime();
-    // 実行中のまま戻ってきたら計測を再開
-    if(activeId!==null){
-      const t=tasks.find(x=>x.id===activeId);
-      if(t&&t.status==='running'&&!t.startedAt){t.startedAt=Date.now();save();}
-    }
-    renderAll();
-  }
+  if(document.hidden){saveBgTime();}
+  else{checkBgTime();}
 });
 
 // ---- Task Actions ----
 function startTask(id){
-  if(activeId!==null&&activeId!==id){const prev=tasks.find(t=>t.id===activeId);if(prev){settle(prev);prev.status='paused';}}
-  activeId=id;const t=tasks.find(t=>t.id===id);
-  if(t){t.status='running';t.startedAt=Date.now();}
-  save();renderAll();
+  if(activeId!==null&&activeId!==id){const t=tasks.find(t=>t.id===activeId);if(t)t.status='paused';}
+  activeId=id;const t=tasks.find(t=>t.id===id);if(t)t.status='running';
+  save();saveBgTime();renderAll();
 }
-function pauseTask(id){activeId=null;const t=tasks.find(t=>t.id===id);if(t){settle(t);t.status='paused';}save();renderAll();}
+function pauseTask(id){activeId=null;const t=tasks.find(t=>t.id===id);if(t)t.status='paused';save();saveBgTime();renderAll();}
 function doneTask(id){
   activeId=null;
   const t=tasks.find(t=>t.id===id);
-  if(t){settle(t);t.status='done';}
-  save();
+  if(t){t.status='done';}
+  save();saveBgTime();
   // 今日の実績にも即時アーカイブ（実績タブ用）
   archiveToday();
   renderAll();
@@ -632,11 +472,10 @@ function archiveToday(){
   const today=todayStr();
   const done=tasks.filter(t=>t.status==='done'&&t.elapsed>0);
   // 上書き（重複しないよう今日分を丸ごと更新）
-  if(done.length)history[today]=done.map(t=>({name:t.name,estimate:t.estimate,elapsed:t.elapsed,color:t.color||'none'}));
-  else delete history[today];
+  history[today]=done.map(t=>({name:t.name,estimate:t.estimate,elapsed:t.elapsed}));
   saveH();
 }
-function resetTask(id){if(activeId===id)activeId=null;const t=tasks.find(t=>t.id===id);if(t){t.status='idle';t.elapsed=0;t.startedAt=null;}save();archiveToday();renderAll();}
+function resetTask(id){if(activeId===id)activeId=null;const t=tasks.find(t=>t.id===id);if(t){t.status='idle';t.elapsed=0;}save();archiveToday();renderAll();}
 function reopenTask(id){
   const t=tasks.find(t=>t.id===id);
   if(t){
@@ -648,163 +487,64 @@ function reopenTask(id){
   }
   save();archiveToday();renderAll();
 }
-function deleteTask(id){if(activeId===id)activeId=null;tasks=tasks.filter(t=>t.id!==id);save();archiveToday();renderAll();}
-function startEditElapsed(id){
-  const t=tasks.find(x=>x.id===id);if(t)settle(t); // 編集中は計測を一旦確定して止める
-  editingElapsedId=id;renderAll();setTimeout(()=>{const i=document.getElementById('el-input-'+id);if(i){i.focus();i.select();}},50);
-}
+function deleteTask(id){if(activeId===id)activeId=null;tasks=tasks.filter(t=>t.id!==id);save();renderAll();}
+function startEditElapsed(id){editingElapsedId=id;renderAll();setTimeout(()=>{const i=document.getElementById('el-input-'+id);if(i){i.focus();i.select();}},50);}
 function commitElapsed(id,val){
   const num=parseFloat(val);
-  const t=tasks.find(t=>t.id===id);
-  if(!isNaN(num)&&num>=0&&t)t.elapsed=num;
-  if(t&&t.status==='running'&&activeId===id)t.startedAt=Date.now(); // 実行中なら計測再開
+  if(!isNaN(num)&&num>=0){const t=tasks.find(t=>t.id===id);if(t)t.elapsed=num;}
   editingElapsedId=null;
   save();archiveToday();renderAll();
 }
 function addTask(){
   const name=document.getElementById('new-name').value.trim();if(!name)return;
-  if(editTaskId!==null){
-    // 編集モード：既存タスクを更新
-    const t=tasks.find(x=>x.id===editTaskId);
-    if(t){t.name=name;t.estimate=newEstimate;t.color=newColor;}
-    editTaskId=null;
-  }else{
-    const newTask={id:nextId++,name,estimate:newEstimate,elapsed:0,status:'idle',color:newColor};
-    insertTaskInto(newTask, insertAfterId);
-  }
-  insertAfterId=null;
+  const newTask={id:nextId++,name,estimate:newEstimate,elapsed:0,status:'idle',color:newColor};
+  if(insertAfterId!==null){ insertTaskInto(newTask, insertAfterId); insertAfterId=null; }
+  else{ tasks.push(newTask); }
   save();hideAddForm();renderAll();
 }
-function commitName(id,val){const s=val.trim();if(s){const t=tasks.find(t=>t.id===id);if(t)t.name=s;}editingNameId=null;save();renderAll();}
+function commitName(id,val){const s=val.trim();if(s){const t=tasks.find(t=>t.id===id);if(t)t.name=s;}save();renderAll();}
 function toggleEstPicker(id){editEstimateId=(editEstimateId===id?null:id);renderAll();}
 function setTaskColor(id,color){const t=tasks.find(t=>t.id===id);if(t)t.color=color;save();renderAll();}
 
 // ---- 並び替えタブ ----
 function renderReorderView(){
   const view=document.getElementById('reorder-view');
-  const fab=document.getElementById('fab');if(fab)fab.style.display=selectMode?'none':'flex';
   const pending=tasks.filter(t=>t.status!=='done');
   if(!pending.length){view.innerHTML='<div class="reorder-wrap"><div class="empty">並び替えるタスクがありません</div></div>';return;}
-  const hint=selectMode?'☑ チェックで複数選択 ／ 選択した行をドラッグでまとめて移動':'⠿ ドラッグで並び替え ／ 名前タップで編集 ／ ＋でその下に追加';
-  let html=`<div class="reorder-wrap">
-    <div class="reorder-toolbar">
-      <div class="reorder-hint" style="padding:0">${hint}</div>
-      <button class="select-toggle-btn${selectMode?' active':''}" onclick="toggleSelectMode()">${selectMode?'✕ 選択終了':'☑ 複数選択'}</button>
-    </div>
-    <div class="insert-gap"><button class="insert-bar" onclick="openTmplPicker('top')">＋ 先頭に追加</button></div>
-    <div class="reorder-list" id="reorder-list">`;
+  let html=`<div class="reorder-wrap"><div class="reorder-hint">⠿ をドラッグして並び替え</div><div class="reorder-list" id="reorder-list">`;
   pending.forEach((task,i)=>{
-    const sel=selectedIds.has(task.id);
-    html+=`<div class="reorder-row${colorCls(task.color)}${sel?' selected':''}" id="rrow-${task.id}" draggable="true"
+    html+=`<div class="reorder-row" id="rrow-${task.id}" draggable="true"
       ondragstart="rDragStart(event,${i})" ondragover="rDragOver(event,${i})" ondrop="rDrop(event,${i})" ondragend="rDragEnd()">
-      ${selectMode?`<input type="checkbox" class="reorder-checkbox" ${sel?'checked':''} onclick="event.stopPropagation();toggleSelect(${task.id})">`:''}
       <div class="reorder-handle"
         ontouchstart="rTouchStart(event,${i})" ontouchmove="rTouchMove(event)" ontouchend="rTouchEnd()">⠿</div>
       <div class="reorder-num">${i+1}</div>
-      <div class="reorder-name" onclick="${selectMode?`toggleSelect(${task.id})`:`showEditTaskForm(${task.id})`}">${esc(task.name)}</div>
+      <div class="reorder-name">${esc(task.name)}</div>
       <div class="reorder-est">${task.estimate}分</div>
-      ${selectMode?'':`<button class="reorder-add" onclick="event.stopPropagation();openTmplPicker(${task.id})" title="この下に追加">＋</button>
-      <button class="reorder-del" onclick="event.stopPropagation();deleteTaskConfirm(${task.id})" title="削除">✕</button>`}
     </div>`;
   });
-  html+=`</div>
-    <div class="insert-gap"><button class="insert-bar" onclick="openTmplPicker(null)">＋ 一番下に追加</button></div>
-  </div>`;
-  if(selectMode&&selectedIds.size>0){
-    html+=`<div class="batch-bar">
-      <span class="batch-bar-label">選択中 ${selectedIds.size}件</span>
-      <button class="batch-btn batch-btn-move" onclick="moveSelectedToTop()">先頭へ</button>
-      <button class="batch-btn batch-btn-move" onclick="moveSelectedToBottom()">末尾へ</button>
-      <button class="batch-btn batch-btn-del" onclick="deleteSelectedConfirm()">削除</button>
-      <button class="batch-btn batch-btn-cancel" onclick="clearSelection()">選択解除</button>
-    </div>`;
-  }
+  html+='</div></div>';
   view.innerHTML=html;
-}
-// 並び替えタブからの削除（誤操作防止のため確認を挟む）
-function deleteTaskConfirm(id){
-  const t=tasks.find(x=>x.id===id);
-  if(!t)return;
-  if(!confirm(`「${t.name}」を削除します。よろしいですか？`))return;
-  deleteTask(id);
-}
-
-// ---- 並び替えタブ: 複数選択 ----
-function toggleSelectMode(){
-  selectMode=!selectMode;
-  if(!selectMode)selectedIds.clear();
-  renderReorderView();
-}
-function toggleSelect(id){
-  if(selectedIds.has(id))selectedIds.delete(id);else selectedIds.add(id);
-  renderReorderView();
-}
-function clearSelection(){selectedIds.clear();renderReorderView();}
-function moveSelectedToTop(){
-  const pending=tasks.filter(t=>t.status!=='done'),done=tasks.filter(t=>t.status==='done');
-  const sel=pending.filter(t=>selectedIds.has(t.id)),rest=pending.filter(t=>!selectedIds.has(t.id));
-  tasks=[...sel,...rest,...done];save();renderAll();
-}
-function moveSelectedToBottom(){
-  const pending=tasks.filter(t=>t.status!=='done'),done=tasks.filter(t=>t.status==='done');
-  const sel=pending.filter(t=>selectedIds.has(t.id)),rest=pending.filter(t=>!selectedIds.has(t.id));
-  tasks=[...rest,...sel,...done];save();renderAll();
-}
-function deleteSelectedConfirm(){
-  if(!selectedIds.size)return;
-  if(!confirm(`選択した${selectedIds.size}件のタスクを削除します。よろしいですか？`))return;
-  tasks=tasks.filter(t=>!selectedIds.has(t.id));
-  selectedIds.clear();
-  save();archiveToday();renderAll();
-}
-// 選択ブロックをtargetIndex（現在のpending配列上の位置）の直前に挿入する
-function moveBlockTo(blockIds,targetIndex){
-  const pendingAll=tasks.filter(t=>t.status!=='done'),done=tasks.filter(t=>t.status==='done');
-  const targetTask=pendingAll[targetIndex];
-  if(!targetTask||blockIds.includes(targetTask.id))return;
-  const blockTasks=pendingAll.filter(t=>blockIds.includes(t.id));
-  const rest=pendingAll.filter(t=>!blockIds.includes(t.id));
-  const idx=rest.findIndex(t=>t.id===targetTask.id);
-  rest.splice(idx,0,...blockTasks);
-  tasks=[...rest,...done];save();renderAll();
 }
 
 // ---- 並び替えタブ: PCドラッグ ----
-let rDragIndex=null, rDragBlockIds=null;
-function rDragStart(e,i){
-  const pending=tasks.filter(t=>t.status!=='done');
-  const task=pending[i];
-  if(selectMode&&selectedIds.has(task.id)&&selectedIds.size>1){
-    rDragBlockIds=pending.filter(t=>selectedIds.has(t.id)).map(t=>t.id);
-    rDragIndex=null;
-  }else{
-    rDragBlockIds=null;rDragIndex=i;
-  }
-  e.dataTransfer.effectAllowed='move';
-}
+let rDragIndex=null;
+function rDragStart(e,i){rDragIndex=i;e.dataTransfer.effectAllowed='move';}
 function rDragOver(e,i){e.preventDefault();}
 function rDrop(e,i){
   e.preventDefault();
-  if(rDragBlockIds){moveBlockTo(rDragBlockIds,i);rDragBlockIds=null;return;}
   if(rDragIndex===null||rDragIndex===i)return;
   reorder(rDragIndex,i);rDragIndex=null;
 }
-function rDragEnd(){rDragIndex=null;rDragBlockIds=null;}
+function rDragEnd(){rDragIndex=null;}
 
 // ---- 並び替えタブ: タッチドラッグ ----
-let rTouchIndex=null, rTouchClone=null, rTouchBlockIds=null, rTouchOverIndex=null;
+let rTouchIndex=null, rTouchClone=null;
 function rTouchStart(e,i){
-  const pending=tasks.filter(t=>t.status!=='done');
-  const task=pending[i];
-  const isBlock=selectMode&&selectedIds.has(task.id)&&selectedIds.size>1;
-  rTouchBlockIds=isBlock?pending.filter(t=>selectedIds.has(t.id)).map(t=>t.id):null;
-  rTouchOverIndex=null;
   rTouchIndex=i;
   const row=e.currentTarget.closest('.reorder-row');
   const rect=row.getBoundingClientRect();
   rTouchClone=row.cloneNode(true);
   rTouchClone.style.cssText=`position:fixed;left:${rect.left}px;top:${rect.top}px;width:${rect.width}px;opacity:0.8;z-index:999;pointer-events:none;box-shadow:0 6px 16px rgba(0,0,0,0.2);`;
-  if(isBlock)rTouchClone.style.outline='2.5px solid var(--teal)';
   document.body.appendChild(rTouchClone);
   row.classList.add('dragging');
 }
@@ -820,16 +560,11 @@ function rTouchMove(e){
     const r=el.getBoundingClientRect();
     if(y>=r.top&&y<=r.bottom)over=i;
   });
-  if(rTouchBlockIds){
-    rTouchOverIndex=over;
-  }else if(over!==null&&over!==rTouchIndex){
-    reorder(rTouchIndex,over);rTouchIndex=over;
-  }
+  if(over!==null&&over!==rTouchIndex){reorder(rTouchIndex,over);rTouchIndex=over;}
 }
 function rTouchEnd(){
   if(rTouchClone){rTouchClone.remove();rTouchClone=null;}
-  if(rTouchBlockIds&&rTouchOverIndex!==null)moveBlockTo(rTouchBlockIds,rTouchOverIndex);
-  rTouchBlockIds=null;rTouchOverIndex=null;rTouchIndex=null;
+  rTouchIndex=null;
   document.querySelectorAll('.reorder-row').forEach(r=>r.classList.remove('dragging'));
 }
 function reorder(from,to){
@@ -839,22 +574,17 @@ function reorder(from,to){
 }
 
 // ---- テンプレートピッカー ----
-function openTmplPicker(afterId){
-  insertAfterId=(afterId===undefined)?null:afterId; // null=末尾, 'top'=先頭, id=その直後
+function openTmplPicker(){
+  insertAfterId=null;
   const list=document.getElementById('tmpl-pick-list');
-  const newItem=`
-    <div class="tmpl-pick-item" onclick="pickNewTask()">
-      <div class="tmpl-pick-info"><div class="tmpl-pick-name">✏️ 新規タスクを作る</div><div class="tmpl-pick-sub">名前・見積・色を入力</div></div>
-      <div style="font-size:20px;color:#aaa">›</div>
-    </div>`;
   if(!templates.length){
-    list.innerHTML='<div class="empty" style="padding:20px">テンプレートがありません<br>テンプレタブで追加できます</div>'+newItem;
+    list.innerHTML='<div class="empty">テンプレートがありません<br>テンプレタブで追加してください</div>';
   }else{
     list.innerHTML=templates.map(tm=>`
       <div class="tmpl-pick-item${colorCls(tm.color)}" onclick="pickTemplate(${tm.id})">
         <div class="tmpl-pick-info"><div class="tmpl-pick-name">${esc(tm.name)}</div><div class="tmpl-pick-sub">⏰ ${tm.estimate}分</div></div>
         <div style="font-size:20px;color:#aaa">＋</div>
-      </div>`).join('')+newItem;
+      </div>`).join('');
   }
   document.getElementById('tmpl-pick-overlay').style.display='flex';
 }
@@ -862,19 +592,16 @@ function closeTmplPicker(){document.getElementById('tmpl-pick-overlay').style.di
 function pickTemplate(tid){
   const tm=templates.find(t=>t.id===tid);if(!tm)return;
   const newTask={id:nextId++,name:tm.name,estimate:tm.estimate,elapsed:0,status:'idle',color:tm.color};
-  insertTaskInto(newTask, insertAfterId);
-  insertAfterId=null;
+  const pending=tasks.filter(t=>t.status!=='done'),done=tasks.filter(t=>t.status==='done');
+  pending.push(newTask);
+  tasks=[...pending,...done];
   save();closeTmplPicker();renderAll();
 }
-// ピッカーから「新規タスクを作る」→ 挿入位置を保持したまま追加フォームへ
-function pickNewTask(){closeTmplPicker();showAddForm();}
-// afterIdの直後にタスクを挿入する（pending内）。null なら末尾、'top' なら先頭
+// afterIdの直後にタスクを挿入する（pending内）。afterId===null なら先頭、'end'なら末尾
 function insertTaskInto(newTask, afterId){
   const pending=tasks.filter(t=>t.status!=='done'),done=tasks.filter(t=>t.status==='done');
-  if(afterId==='top'){
+  if(afterId===null){
     pending.unshift(newTask);
-  }else if(afterId===null||afterId===undefined){
-    pending.push(newTask);
   }else{
     const idx=pending.findIndex(t=>t.id===afterId);
     if(idx===-1)pending.push(newTask);
@@ -907,51 +634,6 @@ function saveTmpl(){
   if(tmplEditId!==null){const tm=templates.find(t=>t.id===tmplEditId);if(tm){tm.name=name;tm.estimate=tmplEstimate;tm.color=tmplColor;}}
   else{templates.push({id:nextTmplId++,name,estimate:tmplEstimate,color:tmplColor});}
   saveT();hideTmplForm();renderTmplView();
-}
-
-// ---- テンプレート並び替え: PCドラッグ ----
-let tDragIndex=null;
-function tDragStart(e,i){tDragIndex=i;e.dataTransfer.effectAllowed='move';}
-function tDragOver(e,i){e.preventDefault();}
-function tDrop(e,i){
-  e.preventDefault();
-  if(tDragIndex===null||tDragIndex===i)return;
-  tmplReorder(tDragIndex,i);tDragIndex=null;
-}
-function tDragEnd(){tDragIndex=null;}
-
-// ---- テンプレート並び替え: タッチドラッグ ----
-let tTouchIndex=null, tTouchClone=null;
-function tTouchStart(e,i){
-  tTouchIndex=i;
-  const row=e.currentTarget.closest('.tmpl-card');
-  const rect=row.getBoundingClientRect();
-  tTouchClone=row.cloneNode(true);
-  tTouchClone.style.cssText=`position:fixed;left:${rect.left}px;top:${rect.top}px;width:${rect.width}px;opacity:0.8;z-index:999;pointer-events:none;box-shadow:0 6px 16px rgba(0,0,0,0.2);`;
-  document.body.appendChild(tTouchClone);
-  row.classList.add('dragging');
-}
-function tTouchMove(e){
-  if(tTouchIndex===null)return;
-  e.preventDefault();
-  const y=e.touches[0].clientY;
-  if(tTouchClone)tTouchClone.style.top=(y-20)+'px';
-  let over=null;
-  templates.forEach((tm,i)=>{
-    const el=document.getElementById('trow-'+tm.id);if(!el)return;
-    const r=el.getBoundingClientRect();
-    if(y>=r.top&&y<=r.bottom)over=i;
-  });
-  if(over!==null&&over!==tTouchIndex){tmplReorder(tTouchIndex,over);tTouchIndex=over;}
-}
-function tTouchEnd(){
-  if(tTouchClone){tTouchClone.remove();tTouchClone=null;}
-  tTouchIndex=null;
-  document.querySelectorAll('.tmpl-card').forEach(r=>r.classList.remove('dragging'));
-}
-function tmplReorder(from,to){
-  const[moved]=templates.splice(from,1);templates.splice(to,0,moved);
-  saveT();renderTmplView();
 }
 
 // ---- Picker HTML ----
@@ -991,8 +673,6 @@ function switchTab(tab){
   document.getElementById('add-form').style.display='none';
   document.getElementById('tmpl-form').style.display='none';
   document.getElementById('fab').style.display='flex';
-  insertAfterId=null;editTaskId=null;
-  if(tab!=='reorder'){selectMode=false;selectedIds.clear();}
   document.getElementById('end-badge').style.display=(tab==='today'||tab==='reorder')?'flex':'none';
   if(tab==='results'){selectedDate=null;renderResults();}
   if(tab==='tmpl')renderTmplView();
@@ -1001,30 +681,15 @@ function switchTab(tab){
 
 // ---- Add Form ----
 function showAddForm(){
-  editTaskId=null;
   newEstimate=15;newColor='none';
   document.getElementById('new-name').value='';
-  document.getElementById('add-submit').textContent='追加';
   document.getElementById('add-form').style.display='block';
   document.getElementById('fab').style.display='none';
   document.getElementById('add-picker').innerHTML=pickerHTML(newEstimate,'add');
   document.getElementById('add-color-picker').innerHTML=colorPickerHTML(newColor,'add');
   setTimeout(()=>document.getElementById('new-name').focus(),80);
 }
-// 既存タスクの内容編集（並び替えタブの名前タップから）
-function showEditTaskForm(id){
-  const t=tasks.find(x=>x.id===id);if(!t)return;
-  editTaskId=id;insertAfterId=null;
-  newEstimate=t.estimate;newColor=t.color||'none';
-  document.getElementById('new-name').value=t.name;
-  document.getElementById('add-submit').textContent='保存';
-  document.getElementById('add-form').style.display='block';
-  document.getElementById('fab').style.display='none';
-  document.getElementById('add-picker').innerHTML=pickerHTML(newEstimate,'add');
-  document.getElementById('add-color-picker').innerHTML=colorPickerHTML(newColor,'add');
-  setTimeout(()=>document.getElementById('new-name').focus(),80);
-}
-function hideAddForm(){insertAfterId=null;editTaskId=null;document.getElementById('add-form').style.display='none';document.getElementById('fab').style.display='flex';}
+function hideAddForm(){insertAfterId=null;document.getElementById('add-form').style.display='none';document.getElementById('fab').style.display='flex';}
 function onFabClick(){
   if(currentTab==='today'){insertAfterId=null;showAddForm();}
   else if(currentTab==='tmpl')showTmplForm(null);
@@ -1035,18 +700,17 @@ function onFabClick(){
 function startInlineEdit(id){
   const el=document.getElementById('name-'+id);if(!el)return;
   const t=tasks.find(t=>t.id===id);if(!t)return;
-  editingNameId=id; editingNameOriginal=t.name; // 編集中フラグと元の名前を退避
   el.outerHTML=`<input class="name-input" id="ni-${id}" value="${esc(t.name)}"
     onblur="commitName(${id},this.value)"
-    onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape'){this.value=editingNameOriginal;this.blur();}">`;
-  setTimeout(()=>{const i=document.getElementById('ni-'+id);if(i){i.focus();}},10);
+    onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape'){this.value='${esc(t.name)}';this.blur();}">`;
+  setTimeout(()=>{const i=document.getElementById('ni-'+id);if(i)i.focus();},10);
 }
 
 // ---- Render ----
 function renderAll(){renderHeader();renderTaskList();if(currentTab==='reorder')renderReorderView();if(currentTab==='results')renderResults();if(currentTab==='tmpl')renderTmplView();}
 
 function renderHeader(){
-  const rem=tasks.filter(t=>t.status!=='done').reduce((s,t)=>s+Math.max(0,t.estimate-curElapsed(t)),0);
+  const rem=tasks.filter(t=>t.status!=='done').reduce((s,t)=>s+Math.max(0,t.estimate-t.elapsed),0);
   // 実行中タスクがあれば現在時刻基準、なければ開始時刻（あれば）基準
   const hasRunning=tasks.some(t=>t.status==='running');
   const base=hasRunning||!startTime?new Date():getBaseTime();
@@ -1065,9 +729,8 @@ function renderTaskList(){
   if(!tasks.length){list.innerHTML='<div class="empty">タスクがありません<br>＋ボタンで追加してください</div>';return;}
   let html='';
   pending.forEach((task)=>{
-    const el=curElapsed(task);
-    const pct=Math.min(1,el/task.estimate)*100;
-    const over=el>task.estimate,isRun=task.status==='running',isPause=task.status==='paused';
+    const pct=Math.min(1,task.elapsed/task.estimate)*100;
+    const over=task.elapsed>task.estimate,isRun=task.status==='running',isPause=task.status==='paused';
     const bar=over?'var(--red)':isRun?'var(--teal)':'#a8dadc';
     const cls=`card${isRun?' running':isPause?' paused':''}${colorCls(task.color)}`;
     const showPick=editEstimateId===task.id;
@@ -1080,8 +743,8 @@ function renderTaskList(){
           <div class="time-row">
             <button class="estimate-chip" onclick="toggleEstPicker(${task.id})">⏰ ${task.estimate}分</button>
             ${isEditingEl
-              ? `<input type="number" min="0" value="${Math.round(el)}" id="el-input-${task.id}" style="width:60px;border:1.5px solid var(--teal);border-radius:6px;padding:2px 6px;font-size:13px;" onkeydown="if(event.key==='Enter')commitElapsed(${task.id},this.value)" onblur="commitElapsed(${task.id},this.value)"><span style="font-size:12px;color:#888">分</span>`
-              : `<span class="elapsed-edit${over?' overrun':''}" onclick="startEditElapsed(${task.id})">実績 ${fmtTime(el)} ✎</span>`}
+              ? `<input type="number" min="0" value="${Math.round(task.elapsed)}" id="el-input-${task.id}" style="width:60px;border:1.5px solid var(--teal);border-radius:6px;padding:2px 6px;font-size:13px;" onkeydown="if(event.key==='Enter')commitElapsed(${task.id},this.value)" onblur="commitElapsed(${task.id},this.value)"><span style="font-size:12px;color:#888">分</span>`
+              : `<span class="elapsed-edit${over?' overrun':''}" onclick="startEditElapsed(${task.id})">実績 ${fmtTime(task.elapsed)} ✎</span>`}
           </div>
           ${showPick?`<div class="inline-picker">${pickerHTML(task.estimate,task.id)}</div><div style="margin-top:8px">${colorPickerHTML(task.color||'none',task.id)}</div><div style="text-align:right;margin-top:10px"><button onclick="toggleEstPicker(${task.id})" style="border:none;background:#eef0f3;border-radius:8px;padding:6px 16px;font-size:13px;font-weight:700;color:#666;cursor:pointer;">▲ 閉じる</button></div>`:''}
         </div>
@@ -1119,12 +782,10 @@ function renderTaskList(){
 function renderTmplView(){
   const view=document.getElementById('tmpl-view');
   if(!templates.length){view.innerHTML='<div class="tmpl-wrap"><div class="empty">テンプレートがありません<br>＋ボタンで追加してください</div></div>';return;}
-  let html='<div class="tmpl-wrap"><div class="reorder-hint">⠿ ドラッグで並び替え（ピッカーにも同じ順で表示されます）</div>';
-  templates.forEach((tm,i)=>{
-    html+=`<div class="tmpl-card${colorCls(tm.color)}" id="trow-${tm.id}" draggable="true"
-      ondragstart="tDragStart(event,${i})" ondragover="tDragOver(event,${i})" ondrop="tDrop(event,${i})" ondragend="tDragEnd()">
+  let html='<div class="tmpl-wrap">';
+  templates.forEach(tm=>{
+    html+=`<div class="tmpl-card${colorCls(tm.color)}">
       <div class="tmpl-inner">
-        <div class="reorder-handle" ontouchstart="tTouchStart(event,${i})" ontouchmove="tTouchMove(event)" ontouchend="tTouchEnd()">⠿</div>
         <div class="tmpl-info"><div class="tmpl-name">${esc(tm.name)}</div><div class="tmpl-sub">⏰ ${tm.estimate}分</div></div>
         <div class="tmpl-actions">
           <button class="btn btn-start" onclick="addFromTemplate(${tm.id})" title="今日に追加" style="font-size:22px">＋</button>
@@ -1154,27 +815,25 @@ function renderResults(){
   // 選択日の実績
   const dayTasks=history[selectedDate]||[];
   const tE=dayTasks.reduce((s,t)=>s+t.estimate,0),tEl=dayTasks.reduce((s,t)=>s+t.elapsed,0);
-  // 見積もり精度：見積に近いほど高い（左右対称）。2倍超過で0%、ちょうどで100%。
-  const rate=tE>0?Math.max(0,1-Math.abs(tEl-tE)/tE):0,diff=tEl-tE;
+  const rate=tE>0?Math.min(1,tEl/tE):0,diff=tEl-tE;
   const col=rateColor(rate),dc=diff>0?'var(--red)':'var(--green)';
 
-  // 色（カテゴリ）別平均（全履歴から集計）
+  // タスク別平均（全履歴から集計）
   const avgMap={};
   Object.values(history).forEach(dayArr=>{
     dayArr.forEach(t=>{
-      const c=t.color||'none'; // 旧データ（色未記録）は未分類扱い
-      if(!avgMap[c])avgMap[c]={count:0,totalElapsed:0,totalEstimate:0};
-      avgMap[c].count++;
-      avgMap[c].totalElapsed+=t.elapsed;
-      avgMap[c].totalEstimate+=t.estimate;
+      if(!avgMap[t.name])avgMap[t.name]={count:0,totalElapsed:0,totalEstimate:0};
+      avgMap[t.name].count++;
+      avgMap[t.name].totalElapsed+=t.elapsed;
+      avgMap[t.name].totalEstimate+=t.estimate;
     });
   });
-  const avgList=COLORS.map(c=>c.key).filter(k=>avgMap[k]).map(k=>[k,avgMap[k]]);
+  const avgList=Object.entries(avgMap).filter(([,v])=>v.count>=2).sort((a,b)=>b[1].count-a[1].count).slice(0,5);
 
   const detailHTML=dayTasks.length?dayTasks.map(task=>{
     const r=Math.min(1,task.elapsed/task.estimate),d=task.elapsed-task.estimate;
     return`<div class="detail-card">
-      <div class="detail-name">${task.color&&task.color!=='none'?`<span class="color-dot" style="background:${COLOR_DOT[task.color]||'#ccc'}"></span>`:''}${esc(task.name)}</div>
+      <div class="detail-name">${esc(task.name)}</div>
       <div class="detail-rate-bg"><div class="detail-rate-bar" style="width:${r*100}%;background:${rateColor(r)}"></div></div>
       <div class="detail-row">
         <span>実績 <strong>${fmtTime(task.elapsed)}</strong></span>
@@ -1184,13 +843,13 @@ function renderResults(){
   }).join(''):'<div class="empty">この日の実績はありません</div>';
 
   const avgHTML=avgList.length?`
-    <div class="detail-title" style="margin-top:20px">📈 カテゴリ別平均時間（色別）</div>
-    ${avgList.map(([key,v])=>{
+    <div class="detail-title" style="margin-top:20px">📈 タスク別平均時間（2回以上）</div>
+    ${avgList.map(([name,v])=>{
       const avg=v.totalElapsed/v.count;
       const estAvg=v.totalEstimate/v.count;
       const diff=avg-estAvg;
-      return`<div class="avg-card${colorCls(key)}">
-        <div class="avg-name"><span class="color-dot" style="background:${COLOR_DOT[key]}"></span>${CAT_LABEL[key]}</div>
+      return`<div class="avg-card">
+        <div class="avg-name">${esc(name)}</div>
         <div class="avg-row">
           <span>平均実績 <span class="avg-val">${fmtMin(avg)}</span></span>
           <span>平均見積 <span class="avg-val">${fmtMin(estAvg)}</span></span>
