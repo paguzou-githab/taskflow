@@ -69,6 +69,9 @@ body{font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;background:var(
 .name-edit-row{display:flex;align-items:center;gap:4px;margin-bottom:8px;}
 .name-fixed{font-size:17px;font-weight:700;color:var(--text);opacity:.6;white-space:nowrap;}
 .name-edit-row .name-input{margin-bottom:0;flex:1;min-width:40px;}
+.bc-row{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--border);border-radius:12px;padding:8px 12px;margin-bottom:8px;flex-wrap:wrap;}
+.bc-name{font-weight:700;font-size:14px;flex:1;min-width:56px;}
+.bc-row .color-picker{margin:0;}
 .name-input{width:100%;border:none;border-bottom:2.5px solid var(--teal);background:transparent;font-size:17px;font-weight:700;color:var(--text);padding:2px 0;margin-bottom:8px;outline:none;}
 .time-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .estimate-chip{background:#eef2f7;border:1.5px solid var(--border);border-radius:24px;padding:5px 14px;font-size:14px;font-weight:700;color:#444;cursor:pointer;white-space:nowrap;}
@@ -363,6 +366,9 @@ body{font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;background:var(
 
 <script>
 const SK='taskflow:v4', SKT='taskflow:tmpls', SKH='taskflow:history', SKBG='taskflow:bg';
+const SKBC='taskflow:basecolors'; // 固定部→カラー紐づけ
+let baseColors={}; // {固定部: カラーkey}
+let bcKeys=[]; // 紐づけ一覧表示用のキー配列（描画時に更新）
 const PRESETS=[5,10,15,30,60,90];
 const COLORS=[
   {key:'none',  label:'なし',    cls:'c-none'},
@@ -448,6 +454,17 @@ function loadT(){
 function loadH(){
   try{const d=JSON.parse(localStorage.getItem(SKH)||'{}');if(d&&typeof d==='object')history=d;}catch(e){}
 }
+function saveBC(){try{localStorage.setItem(SKBC,JSON.stringify(baseColors));}catch(e){}}
+function loadBC(){try{const d=JSON.parse(localStorage.getItem(SKBC)||'{}');if(d&&typeof d==='object')baseColors=d;}catch(e){}}
+// 固定部→カラーを学習し、同じ固定部の未完了タスクへ一括反映。noneは紐づけ解除。
+function learnBaseColor(base,color){
+  if(!base)return;
+  if(color&&color!=='none'){
+    baseColors[base]=color;
+    tasks.forEach(t=>{if(t.status!=='done'&&t.base===base)t.color=color;});
+  }else delete baseColors[base];
+  saveBC();
+}
 function archiveDay(dateStr, dayTasks){
   loadH();
   const done=dayTasks.filter(t=>t.status==='done'&&t.elapsed>0);
@@ -473,7 +490,7 @@ function migrateSplit(t){
 
 // ---- バックアップ / 復元 ----
 function openBackup(){
-  const data={v:4,tasks,nextId,templates,nextTmplId,history,startTime,date:todayStr()};
+  const data={v:4,tasks,nextId,templates,nextTmplId,history,baseColors,startTime,date:todayStr()};
   document.getElementById('backup-text').value=JSON.stringify(data);
   document.getElementById('copy-btn').textContent='📋 コピー';
   document.getElementById('backup-dialog').style.display='flex';
@@ -499,9 +516,10 @@ function importBackup(){
   tasks=d.tasks.map(t=>migrateSplit({...t,status:t.status==='running'?'paused':t.status,startedAt:null}));
   nextId=typeof d.nextId==='number'?d.nextId:nextId;
   if(d.history&&typeof d.history==='object')history=d.history;
+  if(d.baseColors&&typeof d.baseColors==='object')baseColors=d.baseColors;
   startTime=('startTime' in d)?d.startTime:null;
   activeId=null;
-  save();saveT();saveH();
+  save();saveT();saveH();saveBC();
   closeBackup();renderAll();
   alert('復元しました。');
 }
@@ -687,22 +705,24 @@ function addTask(){
   if(!base){base=suffix;suffix='';} // 固定部が空なら可変部を名前として扱う
   if(!base)return;
   const name=base+suffix;
+  let color=newColor;
+  if(color!=='none')learnBaseColor(base,color); // 明示指定は学習＋一括反映
+  else if(baseColors[base])color=baseColors[base]; // 未指定なら紐づけ色を自動適用
   if(editTaskId!==null){
     // 編集モード：既存タスクを更新
     const t=tasks.find(x=>x.id===editTaskId);
-    if(t){t.base=base;t.suffix=suffix;t.name=name;t.estimate=newEstimate;t.color=newColor;}
+    if(t){t.base=base;t.suffix=suffix;t.name=name;t.estimate=newEstimate;t.color=color;}
     editTaskId=null;
   }else{
-    const newTask={id:nextId++,name,base,suffix,estimate:newEstimate,elapsed:0,status:'idle',color:newColor};
+    const newTask={id:nextId++,name,base,suffix,estimate:newEstimate,elapsed:0,status:'idle',color};
     insertTaskInto(newTask, insertAfterId);
   }
   insertAfterId=null;
   save();hideAddForm();renderAll();
 }
-function commitName(id,val){const s=val.trim();if(s){const t=tasks.find(t=>t.id===id);if(t){t.name=s;delete t.base;migrateSplit(t);}}editingNameId=null;save();renderAll();}
-function commitSuffix(id,val){const t=tasks.find(t=>t.id===id);if(t){t.suffix=val.trim();syncName(t);}editingNameId=null;save();renderAll();}
+// （名前確定処理は commitInline に統合）
 function toggleEstPicker(id){editEstimateId=(editEstimateId===id?null:id);renderAll();}
-function setTaskColor(id,color){const t=tasks.find(t=>t.id===id);if(t)t.color=color;save();renderAll();}
+function setTaskColor(id,color){const t=tasks.find(t=>t.id===id);if(t){t.color=color;learnBaseColor(t.base,color);}save();renderAll();}
 
 // ---- 並び替えタブ ----
 function renderReorderView(){
@@ -886,7 +906,7 @@ function openTmplPicker(afterId){
 function closeTmplPicker(){document.getElementById('tmpl-pick-overlay').style.display='none';}
 function pickTemplate(tid){
   const tm=templates.find(t=>t.id===tid);if(!tm)return;
-  const newTask={id:nextId++,name:tm.name,base:tm.name,suffix:'',estimate:tm.estimate,elapsed:0,status:'idle',color:tm.color};
+  const newTask={id:nextId++,name:tm.name,base:tm.name,suffix:'',estimate:tm.estimate,elapsed:0,status:'idle',color:baseColors[tm.name]||tm.color};
   insertTaskInto(newTask, insertAfterId);
   insertAfterId=null;
   save();closeTmplPicker();renderAll();
@@ -911,7 +931,7 @@ function insertTaskInto(newTask, afterId){
 // ---- Template Actions ----
 function addFromTemplate(tid){
   const tm=templates.find(t=>t.id===tid);if(!tm)return;
-  tasks.push({id:nextId++,name:tm.name,base:tm.name,suffix:'',estimate:tm.estimate,elapsed:0,status:'idle',color:tm.color});
+  tasks.push({id:nextId++,name:tm.name,base:tm.name,suffix:'',estimate:tm.estimate,elapsed:0,status:'idle',color:baseColors[tm.name]||tm.color});
   save();switchTab('today');renderAll();
 }
 function deleteTmpl(id){templates=templates.filter(t=>t.id!==id);saveT();renderTmplView();}
@@ -1000,6 +1020,7 @@ function colorPickerHTML(sel,ctx){
 function setColorVal(color,ctx){
   if(ctx==='add'){newColor=color;document.getElementById('add-color-picker').innerHTML=colorPickerHTML(color,'add');}
   else if(ctx==='tmpl'){tmplColor=color;document.getElementById('tmpl-color-picker').innerHTML=colorPickerHTML(color,'tmpl');}
+  else if(String(ctx).indexOf('bc:')===0){const k=bcKeys[parseInt(ctx.slice(3))];if(k!=null){learnBaseColor(k,color);save();renderAll();}}
   else{setTaskColor(parseInt(ctx),color);}
 }
 
@@ -1063,22 +1084,33 @@ function startInlineEdit(id){
   const el=document.getElementById('name-'+id);if(!el)return;
   const t=tasks.find(t=>t.id===id);if(!t)return;
   editingNameId=id;
-  if(t.suffix){
-    // 可変部のみ編集（固定部はラベル表示のまま）
-    editingNameOriginal=t.suffix;
-    el.outerHTML=`<div class="name-edit-row"><span class="name-fixed">${esc(t.base)}</span><input class="name-input" id="ni-${id}" value="${esc(t.suffix)}"
-      onblur="commitSuffix(${id},this.value)"
-      onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape'){this.value=editingNameOriginal;this.blur();}"></div>`;
-    setTimeout(()=>{const i=document.getElementById('ni-'+id);if(i){i.focus();i.select();}},10);
-  }else{
-    // 可変部がないタスクは従来通り全体を編集
-    editingNameOriginal=t.name;
-    el.outerHTML=`<input class="name-input" id="ni-${id}" value="${esc(t.name)}"
-      onblur="commitName(${id},this.value)"
-      onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape'){this.value=editingNameOriginal;this.blur();}">`;
-    setTimeout(()=>{const i=document.getElementById('ni-'+id);if(i){i.focus();}},10);
-  }
+  el.outerHTML=`<div class="name-edit-row" id="ner-${id}" onfocusout="inlineFocusOut(event,${id})">
+    <input class="name-input" id="nib-${id}" value="${esc(t.base||t.name)}" placeholder="固定部" style="flex:2"
+      onkeydown="if(event.key==='Enter')commitInline(${id});if(event.key==='Escape')cancelInline()">
+    <input class="name-input" id="ni-${id}" value="${esc(t.suffix||'')}" placeholder="可変部" style="flex:1"
+      onkeydown="if(event.key==='Enter')commitInline(${id});if(event.key==='Escape')cancelInline()">
+  </div>`;
+  setTimeout(()=>{const i=document.getElementById('ni-'+id);if(i){i.focus();i.select();}},10);
 }
+// 2欄の外へフォーカスが出たら確定（欄間の移動は無視）
+function inlineFocusOut(e,id){
+  const wrap=document.getElementById('ner-'+id);
+  if(!wrap)return;
+  if(e.relatedTarget&&wrap.contains(e.relatedTarget))return;
+  commitInline(id);
+}
+function commitInline(id){
+  if(editingNameId!==id)return;
+  const t=tasks.find(t=>t.id===id);
+  const bi=document.getElementById('nib-'+id),si=document.getElementById('ni-'+id);
+  if(t&&bi&&si){
+    let base=bi.value.trim(),suffix=si.value.trim();
+    if(!base){base=suffix;suffix='';}
+    if(base){t.base=base;t.suffix=suffix;syncName(t);if(baseColors[base])t.color=baseColors[base];}
+  }
+  editingNameId=null;save();renderAll();
+}
+function cancelInline(){editingNameId=null;renderAll();}
 
 // ---- Render ----
 function renderAll(){renderHeader();renderTaskList();if(currentTab==='reorder')renderReorderView();if(currentTab==='results')renderResults();if(currentTab==='tmpl')renderTmplView();}
@@ -1156,7 +1188,7 @@ function renderTaskList(){
 
 function renderTmplView(){
   const view=document.getElementById('tmpl-view');
-  if(!templates.length){view.innerHTML='<div class="tmpl-wrap"><div class="empty">テンプレートがありません<br>＋ボタンで追加してください</div></div>';return;}
+  if(!templates.length){view.innerHTML='<div class="tmpl-wrap"><div class="empty">テンプレートがありません<br>＋ボタンで追加してください</div>'+baseColorListHTML()+'</div>';return;}
   let html='<div class="tmpl-wrap"><div class="reorder-hint">⠿ ドラッグで並び替え（ピッカーにも同じ順で表示されます）</div>';
   templates.forEach((tm,i)=>{
     html+=`<div class="tmpl-card${colorCls(tm.color)}" id="trow-${tm.id}" draggable="true"
@@ -1171,7 +1203,26 @@ function renderTmplView(){
         </div>
       </div></div>`;
   });
-  view.innerHTML=html+'</div>';
+  view.innerHTML=html+baseColorListHTML()+'</div>';
+}
+// ---- カラー紐づけ一覧（テンプレタブ下部） ----
+function baseColorListHTML(){
+  bcKeys=Object.keys(baseColors).sort((a,b)=>a.localeCompare(b,'ja'));
+  let html=`<div class="reorder-hint" style="margin-top:22px">🎨 カラー紐づけ ─ タスクの色を変えると固定部ごとに自動で記憶されます</div>`;
+  if(!bcKeys.length)return html+`<div style="color:#aaa;font-size:13px;padding:6px 4px 14px">紐づけはまだありません</div>`;
+  bcKeys.forEach((k,i)=>{
+    html+=`<div class="bc-row">
+      <span class="bc-name">${esc(k)}</span>
+      ${colorPickerHTML(baseColors[k],'bc:'+i)}
+      <button class="reorder-del" onclick="removeBaseColor(${i})" title="紐づけ解除">✕</button>
+    </div>`;
+  });
+  return html;
+}
+function removeBaseColor(i){
+  const k=bcKeys[i];if(k==null)return;
+  if(!confirm(`「${k}」のカラー紐づけを解除します。よろしいですか？（既存タスクの色はそのまま）`))return;
+  delete baseColors[k];saveBC();renderTmplView();
 }
 
 function renderResults(){
@@ -1260,7 +1311,7 @@ function renderResults(){
 function selectDate(d){selectedDate=d;renderResults();}
 
 // ---- Init ----
-loadT();load();loadH(); // 移行判定でテンプレ名を使うため loadT を先に
+loadT();load();loadH();loadBC(); // 移行判定でテンプレ名を使うため loadT を先に
 tasks.forEach(migrateSplit);
 checkBgTime();
 renderAll();
