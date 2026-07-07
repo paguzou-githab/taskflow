@@ -215,6 +215,19 @@ body{font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;background:var(
 .color-dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px;vertical-align:-1px;flex-shrink:0;}
 .reorder-add{border:none;background:#eef2f7;color:#666;border-radius:8px;width:32px;height:32px;font-size:17px;font-weight:800;cursor:pointer;flex-shrink:0;line-height:1;}
 .reorder-add:active{background:var(--teal);color:#fff;}
+.reorder-del{border:none;background:#fef0f0;color:#e74c3c;border-radius:8px;width:32px;height:32px;font-size:15px;font-weight:800;cursor:pointer;flex-shrink:0;line-height:1;}
+.reorder-del:active{background:#e74c3c;color:#fff;}
+.reorder-row.selected{box-shadow:0 0 0 2.5px var(--teal),0 2px 8px rgba(0,0,0,0.06);background:#eafffb;}
+.reorder-checkbox{width:22px;height:22px;flex-shrink:0;accent-color:var(--teal);cursor:pointer;}
+.select-toggle-btn{border:none;background:#eef2f7;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;color:#555;cursor:pointer;white-space:nowrap;}
+.select-toggle-btn.active{background:var(--teal);color:#fff;}
+.reorder-toolbar{display:flex;align-items:center;justify-content:space-between;padding:4px 4px 12px;gap:8px;}
+.batch-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:540px;background:#fff;border-top:1px solid var(--border);padding:14px 16px;box-shadow:0 -6px 24px rgba(0,0,0,0.12);z-index:210;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.batch-bar-label{font-size:13px;font-weight:800;color:var(--dark);margin-right:auto;}
+.batch-btn{border:none;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:700;cursor:pointer;}
+.batch-btn-move{background:#eef2f7;color:#444;}
+.batch-btn-del{background:#fef0f0;color:#e74c3c;}
+.batch-btn-cancel{background:#f0f0f0;color:#888;}
 
 /* テンプレート */
 .tmpl-wrap{padding:14px 14px 100px;}
@@ -368,6 +381,8 @@ let bgElapsed=0, bgTaskId=null; // バックグラウンド用
 let selectedDate=null; // 実績タブの選択日付
 let startTime=null; // 今日の開始時刻 "HH:MM" or null（現在時刻使用）
 let insertAfterId=null; // 並び替えタブで「ここに追加」した挿入位置
+let selectMode=false; // 並び替えタブ：複数選択モード
+let selectedIds=new Set(); // 並び替えタブ：選択中のタスクID
 let editingElapsedId=null; // 実績時間編集中のタスクID
 let editingNameId=null, editingNameOriginal=''; // 名前編集中のタスクIDと元の名前
 let editTaskId=null; // 追加フォームを「編集モード」で使う際の対象タスクID
@@ -667,46 +682,129 @@ function setTaskColor(id,color){const t=tasks.find(t=>t.id===id);if(t)t.color=co
 // ---- 並び替えタブ ----
 function renderReorderView(){
   const view=document.getElementById('reorder-view');
+  const fab=document.getElementById('fab');if(fab)fab.style.display=selectMode?'none':'flex';
   const pending=tasks.filter(t=>t.status!=='done');
   if(!pending.length){view.innerHTML='<div class="reorder-wrap"><div class="empty">並び替えるタスクがありません</div></div>';return;}
+  const hint=selectMode?'☑ チェックで複数選択 ／ 選択した行をドラッグでまとめて移動':'⠿ ドラッグで並び替え ／ 名前タップで編集 ／ ＋でその下に追加';
   let html=`<div class="reorder-wrap">
-    <div class="reorder-hint">⠿ ドラッグで並び替え ／ 名前タップで編集 ／ ＋でその下に追加</div>
+    <div class="reorder-toolbar">
+      <div class="reorder-hint" style="padding:0">${hint}</div>
+      <button class="select-toggle-btn${selectMode?' active':''}" onclick="toggleSelectMode()">${selectMode?'✕ 選択終了':'☑ 複数選択'}</button>
+    </div>
     <div class="insert-gap"><button class="insert-bar" onclick="openTmplPicker('top')">＋ 先頭に追加</button></div>
     <div class="reorder-list" id="reorder-list">`;
   pending.forEach((task,i)=>{
-    html+=`<div class="reorder-row${colorCls(task.color)}" id="rrow-${task.id}" draggable="true"
+    const sel=selectedIds.has(task.id);
+    html+=`<div class="reorder-row${colorCls(task.color)}${sel?' selected':''}" id="rrow-${task.id}" draggable="true"
       ondragstart="rDragStart(event,${i})" ondragover="rDragOver(event,${i})" ondrop="rDrop(event,${i})" ondragend="rDragEnd()">
+      ${selectMode?`<input type="checkbox" class="reorder-checkbox" ${sel?'checked':''} onclick="event.stopPropagation();toggleSelect(${task.id})">`:''}
       <div class="reorder-handle"
         ontouchstart="rTouchStart(event,${i})" ontouchmove="rTouchMove(event)" ontouchend="rTouchEnd()">⠿</div>
       <div class="reorder-num">${i+1}</div>
-      <div class="reorder-name" onclick="showEditTaskForm(${task.id})">${esc(task.name)}</div>
+      <div class="reorder-name" onclick="${selectMode?`toggleSelect(${task.id})`:`showEditTaskForm(${task.id})`}">${esc(task.name)}</div>
       <div class="reorder-est">${task.estimate}分</div>
-      <button class="reorder-add" onclick="event.stopPropagation();openTmplPicker(${task.id})" title="この下に追加">＋</button>
+      ${selectMode?'':`<button class="reorder-add" onclick="event.stopPropagation();openTmplPicker(${task.id})" title="この下に追加">＋</button>
+      <button class="reorder-del" onclick="event.stopPropagation();deleteTaskConfirm(${task.id})" title="削除">✕</button>`}
     </div>`;
   });
-  html+='</div></div>';
+  html+=`</div>
+    <div class="insert-gap"><button class="insert-bar" onclick="openTmplPicker(null)">＋ 一番下に追加</button></div>
+  </div>`;
+  if(selectMode&&selectedIds.size>0){
+    html+=`<div class="batch-bar">
+      <span class="batch-bar-label">選択中 ${selectedIds.size}件</span>
+      <button class="batch-btn batch-btn-move" onclick="moveSelectedToTop()">先頭へ</button>
+      <button class="batch-btn batch-btn-move" onclick="moveSelectedToBottom()">末尾へ</button>
+      <button class="batch-btn batch-btn-del" onclick="deleteSelectedConfirm()">削除</button>
+      <button class="batch-btn batch-btn-cancel" onclick="clearSelection()">選択解除</button>
+    </div>`;
+  }
   view.innerHTML=html;
+}
+// 並び替えタブからの削除（誤操作防止のため確認を挟む）
+function deleteTaskConfirm(id){
+  const t=tasks.find(x=>x.id===id);
+  if(!t)return;
+  if(!confirm(`「${t.name}」を削除します。よろしいですか？`))return;
+  deleteTask(id);
+}
+
+// ---- 並び替えタブ: 複数選択 ----
+function toggleSelectMode(){
+  selectMode=!selectMode;
+  if(!selectMode)selectedIds.clear();
+  renderReorderView();
+}
+function toggleSelect(id){
+  if(selectedIds.has(id))selectedIds.delete(id);else selectedIds.add(id);
+  renderReorderView();
+}
+function clearSelection(){selectedIds.clear();renderReorderView();}
+function moveSelectedToTop(){
+  const pending=tasks.filter(t=>t.status!=='done'),done=tasks.filter(t=>t.status==='done');
+  const sel=pending.filter(t=>selectedIds.has(t.id)),rest=pending.filter(t=>!selectedIds.has(t.id));
+  tasks=[...sel,...rest,...done];save();renderAll();
+}
+function moveSelectedToBottom(){
+  const pending=tasks.filter(t=>t.status!=='done'),done=tasks.filter(t=>t.status==='done');
+  const sel=pending.filter(t=>selectedIds.has(t.id)),rest=pending.filter(t=>!selectedIds.has(t.id));
+  tasks=[...rest,...sel,...done];save();renderAll();
+}
+function deleteSelectedConfirm(){
+  if(!selectedIds.size)return;
+  if(!confirm(`選択した${selectedIds.size}件のタスクを削除します。よろしいですか？`))return;
+  tasks=tasks.filter(t=>!selectedIds.has(t.id));
+  selectedIds.clear();
+  save();archiveToday();renderAll();
+}
+// 選択ブロックをtargetIndex（現在のpending配列上の位置）の直前に挿入する
+function moveBlockTo(blockIds,targetIndex){
+  const pendingAll=tasks.filter(t=>t.status!=='done'),done=tasks.filter(t=>t.status==='done');
+  const targetTask=pendingAll[targetIndex];
+  if(!targetTask||blockIds.includes(targetTask.id))return;
+  const blockTasks=pendingAll.filter(t=>blockIds.includes(t.id));
+  const rest=pendingAll.filter(t=>!blockIds.includes(t.id));
+  const idx=rest.findIndex(t=>t.id===targetTask.id);
+  rest.splice(idx,0,...blockTasks);
+  tasks=[...rest,...done];save();renderAll();
 }
 
 // ---- 並び替えタブ: PCドラッグ ----
-let rDragIndex=null;
-function rDragStart(e,i){rDragIndex=i;e.dataTransfer.effectAllowed='move';}
+let rDragIndex=null, rDragBlockIds=null;
+function rDragStart(e,i){
+  const pending=tasks.filter(t=>t.status!=='done');
+  const task=pending[i];
+  if(selectMode&&selectedIds.has(task.id)&&selectedIds.size>1){
+    rDragBlockIds=pending.filter(t=>selectedIds.has(t.id)).map(t=>t.id);
+    rDragIndex=null;
+  }else{
+    rDragBlockIds=null;rDragIndex=i;
+  }
+  e.dataTransfer.effectAllowed='move';
+}
 function rDragOver(e,i){e.preventDefault();}
 function rDrop(e,i){
   e.preventDefault();
+  if(rDragBlockIds){moveBlockTo(rDragBlockIds,i);rDragBlockIds=null;return;}
   if(rDragIndex===null||rDragIndex===i)return;
   reorder(rDragIndex,i);rDragIndex=null;
 }
-function rDragEnd(){rDragIndex=null;}
+function rDragEnd(){rDragIndex=null;rDragBlockIds=null;}
 
 // ---- 並び替えタブ: タッチドラッグ ----
-let rTouchIndex=null, rTouchClone=null;
+let rTouchIndex=null, rTouchClone=null, rTouchBlockIds=null, rTouchOverIndex=null;
 function rTouchStart(e,i){
+  const pending=tasks.filter(t=>t.status!=='done');
+  const task=pending[i];
+  const isBlock=selectMode&&selectedIds.has(task.id)&&selectedIds.size>1;
+  rTouchBlockIds=isBlock?pending.filter(t=>selectedIds.has(t.id)).map(t=>t.id):null;
+  rTouchOverIndex=null;
   rTouchIndex=i;
   const row=e.currentTarget.closest('.reorder-row');
   const rect=row.getBoundingClientRect();
   rTouchClone=row.cloneNode(true);
   rTouchClone.style.cssText=`position:fixed;left:${rect.left}px;top:${rect.top}px;width:${rect.width}px;opacity:0.8;z-index:999;pointer-events:none;box-shadow:0 6px 16px rgba(0,0,0,0.2);`;
+  if(isBlock)rTouchClone.style.outline='2.5px solid var(--teal)';
   document.body.appendChild(rTouchClone);
   row.classList.add('dragging');
 }
@@ -722,11 +820,16 @@ function rTouchMove(e){
     const r=el.getBoundingClientRect();
     if(y>=r.top&&y<=r.bottom)over=i;
   });
-  if(over!==null&&over!==rTouchIndex){reorder(rTouchIndex,over);rTouchIndex=over;}
+  if(rTouchBlockIds){
+    rTouchOverIndex=over;
+  }else if(over!==null&&over!==rTouchIndex){
+    reorder(rTouchIndex,over);rTouchIndex=over;
+  }
 }
 function rTouchEnd(){
   if(rTouchClone){rTouchClone.remove();rTouchClone=null;}
-  rTouchIndex=null;
+  if(rTouchBlockIds&&rTouchOverIndex!==null)moveBlockTo(rTouchBlockIds,rTouchOverIndex);
+  rTouchBlockIds=null;rTouchOverIndex=null;rTouchIndex=null;
   document.querySelectorAll('.reorder-row').forEach(r=>r.classList.remove('dragging'));
 }
 function reorder(from,to){
@@ -889,6 +992,7 @@ function switchTab(tab){
   document.getElementById('tmpl-form').style.display='none';
   document.getElementById('fab').style.display='flex';
   insertAfterId=null;editTaskId=null;
+  if(tab!=='reorder'){selectMode=false;selectedIds.clear();}
   document.getElementById('end-badge').style.display=(tab==='today'||tab==='reorder')?'flex':'none';
   if(tab==='results'){selectedDate=null;renderResults();}
   if(tab==='tmpl')renderTmplView();
