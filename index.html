@@ -1247,18 +1247,27 @@ function renderResults(){
   const rate=tE>0?Math.max(0,1-Math.abs(tEl-tE)/tE):0,diff=tEl-tE;
   const col=rateColor(rate),dc=diff>0?'var(--red)':'var(--green)';
 
-  // 色（カテゴリ）別平均（全履歴から集計）
-  const avgMap={};
+  // 固定部別平均（全履歴から集計）。実績名を既知の固定部と前方一致（最長優先）で照合し、
+  // どの固定部にも当てはまらないものは従来通り色でまとめる。
+  const knownBases=new Set(Object.keys(baseColors));
+  templates.forEach(tm=>{if(tm.name)knownBases.add(tm.name);});
+  tasks.forEach(t=>{if(t.base)knownBases.add(t.base);});
+  const baseArr=[...knownBases];
+  const baseOfName=n=>{let best='';baseArr.forEach(b=>{if(n.startsWith(b)&&b.length>best.length)best=b;});return best||null;};
+  const avgMap={}; // key: 'b:固定部' または 'c:色'
   Object.values(history).forEach(dayArr=>{
     dayArr.forEach(t=>{
-      const c=t.color||'none'; // 旧データ（色未記録）は未分類扱い
-      if(!avgMap[c])avgMap[c]={count:0,totalElapsed:0,totalEstimate:0};
-      avgMap[c].count++;
-      avgMap[c].totalElapsed+=t.elapsed;
-      avgMap[c].totalEstimate+=t.estimate;
+      const b=baseOfName(t.name||'');
+      const key=b?'b:'+b:'c:'+(t.color||'none');
+      if(!avgMap[key])avgMap[key]={count:0,totalElapsed:0,totalEstimate:0,colors:{}};
+      const m=avgMap[key];
+      m.count++;m.totalElapsed+=t.elapsed;m.totalEstimate+=t.estimate;
+      const c=t.color||'none';m.colors[c]=(m.colors[c]||0)+1;
     });
   });
-  const avgList=COLORS.map(c=>c.key).filter(k=>avgMap[k]).map(k=>[k,avgMap[k]]);
+  const baseRows=Object.keys(avgMap).filter(k=>k.indexOf('b:')===0).sort((a,b)=>avgMap[b].count-avgMap[a].count);
+  const colorRows=COLORS.map(c=>'c:'+c.key).filter(k=>avgMap[k]);
+  const avgList=[...baseRows,...colorRows];
 
   const detailHTML=dayTasks.length?dayTasks.map(task=>{
     const r=Math.min(1,task.elapsed/task.estimate),d=task.elapsed-task.estimate;
@@ -1273,13 +1282,24 @@ function renderResults(){
   }).join(''):'<div class="empty">この日の実績はありません</div>';
 
   const avgHTML=avgList.length?`
-    <div class="detail-title" style="margin-top:20px">📈 カテゴリ別平均時間（色別）</div>
-    ${avgList.map(([key,v])=>{
+    <div class="detail-title" style="margin-top:20px">📈 カテゴリ別平均時間</div>
+    ${avgList.map(key=>{
+      const v=avgMap[key];
       const avg=v.totalElapsed/v.count;
       const estAvg=v.totalEstimate/v.count;
       const diff=avg-estAvg;
-      return`<div class="avg-card${colorCls(key)}">
-        <div class="avg-name"><span class="color-dot" style="background:${COLOR_DOT[key]}"></span>${CAT_LABEL[key]}</div>
+      let label,ckey;
+      if(key.indexOf('b:')===0){
+        const b=key.slice(2);
+        // 表示色は紐づけ色、なければ実績内で最も多かった色
+        ckey=baseColors[b]||Object.keys(v.colors).sort((x,y)=>v.colors[y]-v.colors[x])[0]||'none';
+        label=esc(b);
+      }else{
+        ckey=key.slice(2);
+        label=CAT_LABEL[ckey]+(baseRows.length?'（その他）':'');
+      }
+      return`<div class="avg-card${colorCls(ckey)}">
+        <div class="avg-name"><span class="color-dot" style="background:${COLOR_DOT[ckey]||'#ccc'}"></span>${label}</div>
         <div class="avg-row">
           <span>平均実績 <span class="avg-val">${fmtMin(avg)}</span></span>
           <span>平均見積 <span class="avg-val">${fmtMin(estAvg)}</span></span>
