@@ -273,7 +273,7 @@ body{font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;background:var(
     <div id="add-name-hint" style="display:none;font-size:13px;color:#888;margin-bottom:8px"></div>
     <div style="display:flex;gap:8px">
       <select class="add-input" id="new-category" style="flex:1;min-width:0" onchange="onCategorySelect(this,'add')"></select>
-      <input class="add-input" id="new-subaccount" list="subaccount-list" placeholder="補助科目" style="flex:1;min-width:0" onkeydown="if(event.key==='Enter')addTask()">
+      <input class="add-input" id="new-subaccount" placeholder="補助科目" style="flex:1;min-width:0" onkeydown="if(event.key==='Enter')addTask()">
     </div>
     <div class="add-label">見積もり時間</div>
     <div id="add-picker"></div>
@@ -290,7 +290,7 @@ body{font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;background:var(
     <div id="tmpl-name-hint" style="display:none;font-size:13px;color:#888;margin-bottom:8px"></div>
     <div style="display:flex;gap:8px">
       <select class="add-input" id="tmpl-category" style="flex:1;min-width:0" onchange="onCategorySelect(this,'tmpl')"></select>
-      <input class="add-input" id="tmpl-subaccount" list="subaccount-list" placeholder="補助科目" style="flex:1;min-width:0" onkeydown="if(event.key==='Enter')saveTmpl()">
+      <input class="add-input" id="tmpl-subaccount" placeholder="補助科目" style="flex:1;min-width:0" onkeydown="if(event.key==='Enter')saveTmpl()">
     </div>
     <div class="add-label">見積もり時間</div>
     <div id="tmpl-picker"></div>
@@ -362,7 +362,6 @@ body{font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;background:var(
   </div>
 
   <button class="fab" id="fab" onclick="onFabClick()">＋</button>
-  <datalist id="subaccount-list"></datalist>
 </div>
 
 <script>
@@ -660,9 +659,9 @@ function doneTask(id){
       const nextTmpl=templates.find(tm=>tm.id===nextTmplId);
       if(nextTmpl){
         const inheritSub=t.subAccount||'none';
-        const nextCat=nextTmpl.categoryName||'none';
-        // 次テンプレにカテゴリ名があれば「カテゴリ名+引き継ぎ補助科目」で名前を再生成。なければテンプレ名のまま
-        const nextName=(nextCat!=='none')?buildTaskName(nextCat,inheritSub):nextTmpl.name;
+        // カテゴリ名がない旧テンプレはテンプレ名をカテゴリ扱いにする（補助科目が名前に反映されるように）
+        const nextCat=(nextTmpl.categoryName&&nextTmpl.categoryName!=='none')?nextTmpl.categoryName:nextTmpl.name;
+        const nextName=buildTaskName(nextCat,inheritSub);
         pendingNextTask={name:nextName,categoryName:nextCat,estimate:nextTmpl.estimate,color:nextTmpl.color,subAccount:inheritSub,templateId:nextTmpl.id};
         const saLine=(inheritSub!=='none')?`<br><span style="font-size:13px;color:#999">補助科目「${esc(inheritSub)}」を引き継ぎます</span>`:'';
         document.getElementById('next-task-dialog-body').innerHTML=
@@ -761,7 +760,6 @@ function addTask(){
     const newTask={id:nextId++,name:genName,categoryName:cat||'none',estimate:newEstimate,elapsed:0,status:'idle',color:newColor,subAccount:sub||'none',templateId:addFormTemplateId};
     insertTaskInto(newTask, insertAfterId);
   }
-  rememberSubAccount(sub);
   insertAfterId=null;
   save();hideAddForm();renderAll();
 }
@@ -898,7 +896,6 @@ function showTmplForm(id){
   tmplCategory=tm?(tm.categoryName||'none'):'none';
   document.getElementById('tmpl-category').innerHTML=categoryOptionsHTML(tmplCategory);
   document.getElementById('tmpl-subaccount').value=(tm&&tm.subAccount&&tm.subAccount!=='none')?tm.subAccount:'';
-  renderSubAccountDatalist();
   const hint=document.getElementById('tmpl-name-hint');
   if(tm&&(!tm.categoryName||tm.categoryName==='none')){
     hint.innerHTML=`現在の名前「<strong>${esc(tm.name)}</strong>」（カテゴリ未選択のまま保存すると名前はそのままです）`;
@@ -928,7 +925,6 @@ function saveTmpl(){
     if(!genName)return;
     templates.push({id:nextTmplId++,name:genName,categoryName:cat||'none',estimate:tmplEstimate,color:tmplColor,subAccount:sub||'none'});
   }
-  rememberSubAccount(sub);
   saveT();hideTmplForm();renderTmplView();
 }
 
@@ -1066,16 +1062,9 @@ function onCategorySelect(el,ctx){
   }
   if(ctx==='add'){
     newCategory=val||'none';
-    addFormTemplateId=null; // 手動でカテゴリを選び直したらテンプレ紐付けを解除
+    if(editTaskId===null)addFormTemplateId=null; // 新規作成時のみ: 手動選択でテンプレ紐付け解除（編集時は維持しフローを生かす）
   }
   else tmplCategory=val||'none';
-}
-function renderSubAccountDatalist(){
-  const dl=document.getElementById('subaccount-list');
-  if(dl)dl.innerHTML=subAccounts.map(s=>`<option value="${esc(s)}">`).join('');
-}
-function rememberSubAccount(v){
-  if(v&&v!=='none'&&!subAccounts.includes(v)){subAccounts.push(v);saveSA();}
 }
 function addCategoryFromManage(){
   const input=document.getElementById('new-category-input');
@@ -1091,46 +1080,8 @@ function deleteCategoryAt(idx){
   saveCA();renderFlowView();
 }
 
-// ---- 補助科目ピッカー（色とは別の、ユーザーが自由に追加できる可変カテゴリ） ----
-function subAccountPickerHTML(sel,ctx){
-  const none=`<button class="preset-btn${(!sel||sel==='none')?' active':''}" onclick="setSubAccountVal(-1,'${ctx}')">なし</button>`;
-  const chips=subAccounts.map((name,i)=>`<button class="preset-btn${sel===name?' active':''}" onclick="setSubAccountVal(${i},'${ctx}')">${esc(name)}</button>`).join('');
-  const add=`<button class="preset-btn" onclick="addNewSubAccountFromPicker('${ctx}')" style="border-style:dashed;color:var(--teal);border-color:var(--teal)">＋新規</button>`;
-  return`<div class="picker-presets" style="justify-content:flex-start">${none}${chips}${add}</div>`;
-}
-function setSubAccountVal(idx,ctx){
-  const val=idx>=0?subAccounts[idx]:'none';
-  // タスク一覧のインライン変更（フォーム側の補助科目は自由入力欄に移行済み）
-  const t=tasks.find(t=>t.id===parseInt(ctx));
-  if(t){
-    t.subAccount=val;
-    // カテゴリ名が設定されているタスクは名前も再生成して同期
-    if(t.categoryName&&t.categoryName!=='none')t.name=buildTaskName(t.categoryName,val);
-    save();renderAll();
-  }
-}
-function addNewSubAccountFromPicker(ctx){
-  const name=prompt('新しい補助科目名を入力してください');
-  if(!name)return;
-  const v=name.trim();if(!v)return;
-  let idx=subAccounts.indexOf(v);
-  if(idx===-1){subAccounts.push(v);idx=subAccounts.length-1;}
-  saveSA();
-  setSubAccountVal(idx,ctx);
-}
-function addSubAccountFromManage(){
-  const input=document.getElementById('new-subaccount-input');
-  const v=input.value.trim();if(!v)return;
-  if(!subAccounts.includes(v))subAccounts.push(v);
-  input.value='';
-  saveSA();renderFlowView();
-}
-function deleteSubAccountAt(idx){
-  const name=subAccounts[idx];if(name===undefined)return;
-  if(!confirm(`「${name}」を削除しますか？（既にタスクに設定されている分はそのまま残ります）`))return;
-  subAccounts.splice(idx,1);
-  saveSA();renderFlowView();
-}
+// ---- 補助科目（管理リストなし・毎回自由入力。フローで前タスクから引き継がれる） ----
+// 編集はタスク名タップで開く2分割フォーム（カテゴリ名｜補助科目）に一本化
 function setFlowNext(fromTmplId,toIdStr){
   const toId=toIdStr?parseInt(toIdStr):null;
   if(toId)flows[fromTmplId]=toId;else delete flows[fromTmplId];
@@ -1166,7 +1117,6 @@ function showAddForm(){
   document.getElementById('new-category').innerHTML=categoryOptionsHTML('none',true);
   document.getElementById('new-subaccount').value='';
   document.getElementById('add-name-hint').style.display='none';
-  renderSubAccountDatalist();
   document.getElementById('add-submit').textContent='追加';
   document.getElementById('add-form').style.display='block';
   document.getElementById('fab').style.display='none';
@@ -1182,7 +1132,6 @@ function showEditTaskForm(id){
   newCategory=t.categoryName||'none';
   document.getElementById('new-category').innerHTML=categoryOptionsHTML(newCategory,true);
   document.getElementById('new-subaccount').value=(t.subAccount&&t.subAccount!=='none')?t.subAccount:'';
-  renderSubAccountDatalist();
   // 旧形式（カテゴリ未設定）のタスクは、カテゴリ未選択のまま保存すれば名前が維持される旨を表示
   const hint=document.getElementById('add-name-hint');
   if(!t.categoryName||t.categoryName==='none'){
@@ -1245,9 +1194,9 @@ function renderTaskList(){
           <div class="time-row">
             <button class="estimate-chip" onclick="toggleEstPicker(${task.id})">⏰ ${task.estimate}分</button>
             <span class="elapsed-edit${over?' overrun':''}" onclick="startEditElapsed(${task.id})">実績 ${fmtTime(el)} ✎</span>
-            ${task.subAccount&&task.subAccount!=='none'?`<span style="font-size:12px;color:#888;background:#eef2f7;padding:2px 8px;border-radius:10px">🏷 ${esc(task.subAccount)}</span>`:''}
+            ${''/* 補助科目はタスク名（カテゴリ名の右側）に含まれるためチップ表示は廃止 */}
           </div>
-          ${showPick?`<div class="inline-picker">${pickerHTML(task.estimate,task.id)}</div><div style="margin-top:8px">${colorPickerHTML(task.color||'none',task.id)}</div><div style="margin-top:8px">${subAccountPickerHTML(task.subAccount||'none',task.id)}</div><div style="text-align:right;margin-top:10px"><button onclick="toggleEstPicker(${task.id})" style="border:none;background:#eef0f3;border-radius:8px;padding:6px 16px;font-size:13px;font-weight:700;color:#666;cursor:pointer;">▲ 閉じる</button></div>`:''}
+          ${showPick?`<div class="inline-picker">${pickerHTML(task.estimate,task.id)}</div><div style="margin-top:8px">${colorPickerHTML(task.color||'none',task.id)}</div><div style="text-align:right;margin-top:10px"><button onclick="toggleEstPicker(${task.id})" style="border:none;background:#eef0f3;border-radius:8px;padding:6px 16px;font-size:13px;font-weight:700;color:#666;cursor:pointer;">▲ 閉じる</button></div>`:''}
           ${isEditingEl?`<div class="inline-picker">${elapsedManualId===task.id?manualElapsedInputHTML(task.id,el):elapsedPickerHTML(task.id,el)}</div>`:''}
         </div>
         <div class="btn-group">
@@ -1269,7 +1218,7 @@ function renderTaskList(){
         <div class="time-row">
           <span class="elapsed-edit" onclick="startEditElapsed(${task.id})">実績 ${fmtTime(task.elapsed)} ✎</span>
           <span style="color:#ccc;font-size:13px">見積 ${task.estimate}分</span>
-          ${task.subAccount&&task.subAccount!=='none'?`<span style="font-size:12px;color:#888;background:#eef2f7;padding:2px 8px;border-radius:10px">🏷 ${esc(task.subAccount)}</span>`:''}
+          ${''/* 補助科目チップは廃止（タスク名に含まれる） */}
         </div>
         ${isEditingEl?`<div class="inline-picker">${elapsedManualId===task.id?manualElapsedInputHTML(task.id,task.elapsed):elapsedPickerHTML(task.id,task.elapsed)}</div>`:''}
       </div><div class="btn-group">
@@ -1290,7 +1239,7 @@ function renderTmplView(){
       ondragstart="tDragStart(event,${i})" ondragover="tDragOver(event,${i})" ondrop="tDrop(event,${i})" ondragend="tDragEnd()">
       <div class="tmpl-inner">
         <div class="reorder-handle" ontouchstart="tTouchStart(event,${i})" ontouchmove="tTouchMove(event)" ontouchend="tTouchEnd()">⠿</div>
-        <div class="tmpl-info"><div class="tmpl-name">${esc(tm.name)}</div><div class="tmpl-sub">⏰ ${tm.estimate}分${tm.subAccount&&tm.subAccount!=='none'?' ・🏷 '+esc(tm.subAccount):''}</div></div>
+        <div class="tmpl-info"><div class="tmpl-name">${esc(tm.name)}</div><div class="tmpl-sub">⏰ ${tm.estimate}分</div></div>
         <div class="tmpl-actions">
           <button class="btn btn-start" onclick="addFromTemplate(${tm.id})" title="今日に追加" style="font-size:22px">＋</button>
           <button class="btn btn-reset" onclick="showTmplForm(${tm.id})" title="編集" style="font-size:17px">✎</button>
@@ -1305,9 +1254,6 @@ function renderFlowView(){
   const view=document.getElementById('flow-view');
   const caChips=categories.length
     ?categories.map((name,i)=>`<span class="preset-btn" style="display:inline-flex;align-items:center;gap:6px">${esc(name)}<button onclick="deleteCategoryAt(${i})" style="border:none;background:none;color:#e74c3c;font-weight:800;cursor:pointer;font-size:14px;line-height:1;padding:0">✕</button></span>`).join('')
-    :'<span style="color:#bbb;font-size:13px">まだありません</span>';
-  const saChips=subAccounts.length
-    ?subAccounts.map((name,i)=>`<span class="preset-btn" style="display:inline-flex;align-items:center;gap:6px">${esc(name)}<button onclick="deleteSubAccountAt(${i})" style="border:none;background:none;color:#e74c3c;font-weight:800;cursor:pointer;font-size:14px;line-height:1;padding:0">✕</button></span>`).join('')
     :'<span style="color:#bbb;font-size:13px">まだありません</span>';
   const flowRows=templates.length
     ?templates.map(tm=>`
@@ -1327,12 +1273,6 @@ function renderFlowView(){
     <div style="display:flex;gap:8px;margin-bottom:26px">
       <input class="add-input" id="new-category-input" placeholder="新しいカテゴリ名（協定・報告など）" style="margin-bottom:0" onkeydown="if(event.key==='Enter')addCategoryFromManage()">
       <button class="btn btn-start" onclick="addCategoryFromManage()" style="width:48px;flex-shrink:0">＋</button>
-    </div>
-    <div class="detail-title">🏷 補助科目管理</div>
-    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">${saChips}</div>
-    <div style="display:flex;gap:8px;margin-bottom:26px">
-      <input class="add-input" id="new-subaccount-input" placeholder="新しい補助科目名" style="margin-bottom:0" onkeydown="if(event.key==='Enter')addSubAccountFromManage()">
-      <button class="btn btn-start" onclick="addSubAccountFromManage()" style="width:48px;flex-shrink:0">＋</button>
     </div>
     <div class="detail-title">🔗 完了後の自動追加（テンプレ→テンプレ）</div>
     <div style="font-size:13px;color:#888;padding:0 4px 12px">テンプレから追加したタスクを完了すると、設定した次のテンプレを追加するか確認します。補助科目は完了したタスクの設定がそのまま引き継がれます。</div>
