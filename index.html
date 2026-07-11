@@ -1315,10 +1315,10 @@ function renderResults(){
   });
   const avgList=COLORS.map(c=>c.key).filter(k=>avgMap[k]).map(k=>[k,avgMap[k]]);
 
-  const detailHTML=dayTasks.length?dayTasks.map(task=>{
+  const detailHTML=dayTasks.length?dayTasks.map((task,i)=>{
     const r=Math.min(1,task.elapsed/task.estimate),d=task.elapsed-task.estimate;
     return`<div class="detail-card">
-      <div class="detail-name">${task.color&&task.color!=='none'?`<span class="color-dot" style="background:${COLOR_DOT[task.color]||'#ccc'}"></span>`:''}${esc(task.name)}</div>
+      <div class="detail-name" style="display:flex;align-items:center;gap:6px">${task.color&&task.color!=='none'?`<span class="color-dot" style="background:${COLOR_DOT[task.color]||'#ccc'};flex-shrink:0"></span>`:''}<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(task.name)}</span><button onclick="deleteHistItem(${i})" title="この実績を削除" style="border:none;background:#fef0f0;color:#e74c3c;border-radius:8px;width:28px;height:28px;font-size:14px;font-weight:800;cursor:pointer;flex-shrink:0">✕</button></div>
       <div class="detail-rate-bg"><div class="detail-rate-bar" style="width:${r*100}%;background:${rateColor(r)}"></div></div>
       <div class="detail-row">
         <span>実績 <strong>${fmtTime(task.elapsed)}</strong></span>
@@ -1357,13 +1357,59 @@ function renderResults(){
         <div class="rate-row"><span class="rate-label">見積もり精度</span><span class="rate-value" style="color:${col}">${Math.round(rate*100)}%</span></div>
         <div class="rate-bg"><div class="rate-bar" style="width:${rate*100}%;background:${col}"></div></div>
       </div>
-      <div class="detail-title">タスク別実績</div>
+      <div class="detail-title" style="display:flex;align-items:center;justify-content:space-between"><span>タスク別実績</span>${dayTasks.length?`<button onclick="clearHistDay()" style="border:none;background:#fef0f0;color:#e74c3c;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:700;cursor:pointer">🗑 この日をクリア</button>`:''}</div>
       ${detailHTML}
       ${avgHTML}
     </div></div>`;
 }
 
 function selectDate(d){selectedDate=d;renderResults();}
+
+// ---- 実績の削除 ----
+// 注意：今日の実績はrenderResultsのたびにarchiveToday()がtasksから再生成するため、
+// 今日分の削除はhistoryではなくtasks配列側から行う（過去日はhistory直接編集でOK）
+function deleteHistItem(i){
+  loadH();
+  const today=todayStr();
+  const dayTasks=history[selectedDate]||[];
+  const item=dayTasks[i];
+  if(!item)return;
+  if(!confirm(`「${item.name}」の実績を削除しますか？\nこの操作は取り消せません。`))return;
+  if(selectedDate===today){
+    // history[today]はtasksのdoneタスクと同順なので、i番目のdoneタスクを特定して削除
+    const doneIds=tasks.filter(t=>t.status==='done').map(t=>t.id);
+    const targetId=doneIds[i];
+    if(targetId!==undefined){
+      if(activeId===targetId)activeId=null;
+      tasks=tasks.filter(t=>t.id!==targetId);
+      save();
+    }
+    archiveToday();
+  }else{
+    dayTasks.splice(i,1);
+    if(!dayTasks.length)delete history[selectedDate];
+    saveH();
+  }
+  renderAll();
+}
+function clearHistDay(){
+  loadH();
+  const today=todayStr();
+  const label=fmtDate(selectedDate)+(selectedDate===today?'（今日）':'');
+  const cnt=(history[selectedDate]||[]).length;
+  if(!cnt)return;
+  if(!confirm(`${label} の実績${cnt}件をすべて削除しますか？\nこの操作は取り消せません。`))return;
+  if(selectedDate===today){
+    tasks=tasks.filter(t=>t.status!=='done');
+    if(activeId!==null&&!tasks.some(t=>t.id===activeId))activeId=null;
+    save();
+    archiveToday();
+  }else{
+    delete history[selectedDate];
+    saveH();
+  }
+  renderAll();
+}
 
 // ---- Init ----
 load();loadT();loadH();loadSA();loadFL();loadCA();
