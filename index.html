@@ -270,13 +270,15 @@ body{font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;background:var(
 
   <!-- タスク追加フォーム -->
   <div class="add-form" id="add-form" style="display:none">
-    <input class="add-input" id="new-name" placeholder="タスク名を入力" onkeydown="if(event.key==='Enter')addTask()">
+    <div id="add-name-hint" style="display:none;font-size:13px;color:#888;margin-bottom:8px"></div>
+    <div style="display:flex;gap:8px">
+      <select class="add-input" id="new-category" style="flex:1;min-width:0" onchange="onCategorySelect(this,'add')"></select>
+      <input class="add-input" id="new-subaccount" list="subaccount-list" placeholder="補助科目" style="flex:1;min-width:0" onkeydown="if(event.key==='Enter')addTask()">
+    </div>
     <div class="add-label">見積もり時間</div>
     <div id="add-picker"></div>
     <div class="add-label" style="margin-top:14px">色</div>
     <div id="add-color-picker"></div>
-    <div class="add-label" style="margin-top:14px">補助科目</div>
-    <div id="add-subaccount-picker"></div>
     <div class="add-actions">
       <button class="btn-wide btn-delete" onclick="hideAddForm()">キャンセル</button>
       <button class="btn-wide btn-start" id="add-submit" onclick="addTask()">追加</button>
@@ -285,13 +287,15 @@ body{font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;background:var(
 
   <!-- テンプレートフォーム -->
   <div class="tmpl-add-form" id="tmpl-form" style="display:none">
-    <input class="add-input" id="tmpl-name-input" placeholder="テンプレート名" onkeydown="if(event.key==='Enter')saveTmpl()">
+    <div id="tmpl-name-hint" style="display:none;font-size:13px;color:#888;margin-bottom:8px"></div>
+    <div style="display:flex;gap:8px">
+      <select class="add-input" id="tmpl-category" style="flex:1;min-width:0" onchange="onCategorySelect(this,'tmpl')"></select>
+      <input class="add-input" id="tmpl-subaccount" list="subaccount-list" placeholder="補助科目" style="flex:1;min-width:0" onkeydown="if(event.key==='Enter')saveTmpl()">
+    </div>
     <div class="add-label">見積もり時間</div>
     <div id="tmpl-picker"></div>
     <div class="add-label" style="margin-top:14px">色</div>
     <div id="tmpl-color-picker"></div>
-    <div class="add-label" style="margin-top:14px">補助科目</div>
-    <div id="tmpl-subaccount-picker"></div>
     <div class="add-actions">
       <button class="btn-wide btn-delete" onclick="hideTmplForm()">キャンセル</button>
       <button class="btn-wide btn-start"  onclick="saveTmpl()">保存</button>
@@ -358,10 +362,11 @@ body{font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;background:var(
   </div>
 
   <button class="fab" id="fab" onclick="onFabClick()">＋</button>
+  <datalist id="subaccount-list"></datalist>
 </div>
 
 <script>
-const SK='taskflow:v4', SKT='taskflow:tmpls', SKH='taskflow:history', SKBG='taskflow:bg', SKSA='taskflow:subaccounts', SKFL='taskflow:flows';
+const SK='taskflow:v4', SKT='taskflow:tmpls', SKH='taskflow:history', SKBG='taskflow:bg', SKSA='taskflow:subaccounts', SKFL='taskflow:flows', SKCA='taskflow:categories';
 const PRESETS=[5,10,15,30,60,90];
 const COLORS=[
   {key:'none',  label:'なし',    cls:'c-none'},
@@ -383,8 +388,10 @@ let editEstimateId=null, newEstimate=15, newColor='none';
 let tmplEditId=null, tmplEstimate=15, tmplColor='none', tmplSubAccount='none';
 let dragSrcIndex=null, touchSrcIndex=null, touchClone=null;
 let subAccounts=[]; // ユーザー定義の補助科目リスト（色とは別の可変カテゴリ）
+let categories=[]; // ユーザー定義のカテゴリ名リスト（協定・報告・立会など）
 let flows={}; // {テンプレID: 次に追加するテンプレID} 完了後の自動追加ルール
 let newSubAccount='none'; // タスク追加フォームで選択中の補助科目
+let newCategory='none', tmplCategory='none'; // フォームで選択中のカテゴリ名
 let elapsedManualId=null; // 実績編集: 直接入力モードのタスクID
 let pendingNextTask=null; // 完了時に確認待ちの次タスク情報
 let bgElapsed=0, bgTaskId=null; // バックグラウンド用
@@ -406,6 +413,7 @@ function saveT(){try{localStorage.setItem(SKT,JSON.stringify({templates,nextTmpl
 function saveH(){try{localStorage.setItem(SKH,JSON.stringify(history));}catch(e){}}
 function saveSA(){try{localStorage.setItem(SKSA,JSON.stringify(subAccounts));}catch(e){}}
 function saveFL(){try{localStorage.setItem(SKFL,JSON.stringify(flows));}catch(e){}}
+function saveCA(){try{localStorage.setItem(SKCA,JSON.stringify(categories));}catch(e){}}
 
 function load(){
   try{
@@ -458,18 +466,21 @@ function loadSA(){
 function loadFL(){
   try{const d=JSON.parse(localStorage.getItem(SKFL)||'{}');if(d&&typeof d==='object')flows=d;}catch(e){}
 }
+function loadCA(){
+  try{const d=JSON.parse(localStorage.getItem(SKCA)||'[]');if(Array.isArray(d))categories=d;}catch(e){}
+}
 function archiveDay(dateStr, dayTasks){
   loadH();
   const done=dayTasks.filter(t=>t.status==='done');
   // archiveTodayが既にその日を書いている場合があるため、concatせず上書き（二重計上防止）
-  if(done.length)history[dateStr]=done.map(t=>({name:t.name,estimate:t.estimate,elapsed:t.elapsed,color:t.color||'none',subAccount:t.subAccount||'none'}));
+  if(done.length)history[dateStr]=done.map(t=>({name:t.name,estimate:t.estimate,elapsed:t.elapsed,color:t.color||'none',subAccount:t.subAccount||'none',categoryName:t.categoryName||'none'}));
   else delete history[dateStr];
   saveH();
 }
 
 // ---- バックアップ / 復元 ----
 function openBackup(){
-  const data={v:5,tasks,nextId,templates,nextTmplId,history,startTime,subAccounts,flows,date:todayStr()};
+  const data={v:6,tasks,nextId,templates,nextTmplId,history,startTime,subAccounts,categories,flows,date:todayStr()};
   document.getElementById('backup-text').value=JSON.stringify(data);
   document.getElementById('copy-btn').textContent='📋 コピー';
   document.getElementById('backup-dialog').style.display='flex';
@@ -496,10 +507,11 @@ function importBackup(){
   if(typeof d.nextTmplId==='number')nextTmplId=d.nextTmplId;
   if(d.history&&typeof d.history==='object')history=d.history;
   if(Array.isArray(d.subAccounts))subAccounts=d.subAccounts;
+  if(Array.isArray(d.categories))categories=d.categories;
   if(d.flows&&typeof d.flows==='object')flows=d.flows;
   startTime=('startTime' in d)?d.startTime:null;
   activeId=null;
-  save();saveT();saveH();saveSA();saveFL();
+  save();saveT();saveH();saveSA();saveFL();saveCA();
   closeBackup();renderAll();
   alert('復元しました。');
 }
@@ -646,10 +658,14 @@ function doneTask(id){
     if(nextTmplId){
       const nextTmpl=templates.find(tm=>tm.id===nextTmplId);
       if(nextTmpl){
-        pendingNextTask={name:nextTmpl.name,estimate:nextTmpl.estimate,color:nextTmpl.color,subAccount:t.subAccount||'none',templateId:nextTmpl.id};
-        const saLine=(t.subAccount&&t.subAccount!=='none')?`<br><span style="font-size:13px;color:#999">補助科目「${esc(t.subAccount)}」を引き継ぎます</span>`:'';
+        const inheritSub=t.subAccount||'none';
+        const nextCat=nextTmpl.categoryName||'none';
+        // 次テンプレにカテゴリ名があれば「カテゴリ名+引き継ぎ補助科目」で名前を再生成。なければテンプレ名のまま
+        const nextName=(nextCat!=='none')?buildTaskName(nextCat,inheritSub):nextTmpl.name;
+        pendingNextTask={name:nextName,categoryName:nextCat,estimate:nextTmpl.estimate,color:nextTmpl.color,subAccount:inheritSub,templateId:nextTmpl.id};
+        const saLine=(inheritSub!=='none')?`<br><span style="font-size:13px;color:#999">補助科目「${esc(inheritSub)}」を引き継ぎます</span>`:'';
         document.getElementById('next-task-dialog-body').innerHTML=
-          `完了した「<strong>${esc(t.name)}</strong>」の次に、「<strong>${esc(nextTmpl.name)}</strong>」(⏰${nextTmpl.estimate}分)を追加しますか？${saLine}`;
+          `完了した「<strong>${esc(t.name)}</strong>」の次に、「<strong>${esc(nextName)}</strong>」(⏰${nextTmpl.estimate}分)を追加しますか？${saLine}`;
         document.getElementById('next-task-dialog').style.display='flex';
       }
     }
@@ -662,7 +678,7 @@ function doneTask(id){
 function confirmNextTask(){
   if(pendingNextTask){
     const p=pendingNextTask;
-    const newTaskObj={id:nextId++,name:p.name,estimate:p.estimate,elapsed:0,status:'idle',color:p.color,subAccount:p.subAccount,templateId:p.templateId};
+    const newTaskObj={id:nextId++,name:p.name,categoryName:p.categoryName||'none',estimate:p.estimate,elapsed:0,status:'idle',color:p.color,subAccount:p.subAccount,templateId:p.templateId};
     insertTaskInto(newTaskObj,'top');
     save();
   }
@@ -679,7 +695,7 @@ function archiveToday(){
   const today=todayStr();
   const done=tasks.filter(t=>t.status==='done');
   // 上書き（重複しないよう今日分を丸ごと更新）
-  if(done.length)history[today]=done.map(t=>({name:t.name,estimate:t.estimate,elapsed:t.elapsed,color:t.color||'none',subAccount:t.subAccount||'none'}));
+  if(done.length)history[today]=done.map(t=>({name:t.name,estimate:t.estimate,elapsed:t.elapsed,color:t.color||'none',subAccount:t.subAccount||'none',categoryName:t.categoryName||'none'}));
   else delete history[today];
   saveH();
 }
@@ -725,20 +741,28 @@ function commitElapsed(id,val){
   save();archiveToday();renderAll();
 }
 function addTask(){
-  const name=document.getElementById('new-name').value.trim();if(!name)return;
+  const cat=(newCategory&&newCategory!=='none')?newCategory:'';
+  const sub=document.getElementById('new-subaccount').value.trim();
+  const genName=buildTaskName(cat,sub);
   if(editTaskId!==null){
     // 編集モード：既存タスクを更新
     const t=tasks.find(x=>x.id===editTaskId);
-    if(t){t.name=name;t.estimate=newEstimate;t.color=newColor;t.subAccount=newSubAccount;}
+    if(t){
+      // カテゴリ未選択（旧タスク等）の場合は既存の名前を維持する
+      if(genName)t.name=genName;
+      t.categoryName=cat||'none';
+      t.estimate=newEstimate;t.color=newColor;t.subAccount=sub||'none';
+    }
     editTaskId=null;
   }else{
-    const newTask={id:nextId++,name,estimate:newEstimate,elapsed:0,status:'idle',color:newColor,subAccount:newSubAccount,templateId:null};
+    if(!genName)return; // カテゴリも補助科目も空なら追加しない
+    const newTask={id:nextId++,name:genName,categoryName:cat||'none',estimate:newEstimate,elapsed:0,status:'idle',color:newColor,subAccount:sub||'none',templateId:null};
     insertTaskInto(newTask, insertAfterId);
   }
+  rememberSubAccount(sub);
   insertAfterId=null;
   save();hideAddForm();renderAll();
 }
-function commitName(id,val){const s=val.trim();if(s){const t=tasks.find(t=>t.id===id);if(t)t.name=s;}editingNameId=null;save();renderAll();}
 function toggleEstPicker(id){editEstimateId=(editEstimateId===id?null:id);renderAll();}
 function setTaskColor(id,color){const t=tasks.find(t=>t.id===id);if(t)t.color=color;save();renderAll();}
 
@@ -836,7 +860,7 @@ function openTmplPicker(afterId){
 function closeTmplPicker(){document.getElementById('tmpl-pick-overlay').style.display='none';}
 function pickTemplate(tid){
   const tm=templates.find(t=>t.id===tid);if(!tm)return;
-  const newTask={id:nextId++,name:tm.name,estimate:tm.estimate,elapsed:0,status:'idle',color:tm.color,subAccount:tm.subAccount||'none',templateId:tm.id};
+  const newTask={id:nextId++,name:tm.name,categoryName:tm.categoryName||'none',estimate:tm.estimate,elapsed:0,status:'idle',color:tm.color,subAccount:tm.subAccount||'none',templateId:tm.id};
   insertTaskInto(newTask, insertAfterId);
   insertAfterId=null;
   save();closeTmplPicker();renderAll();
@@ -861,7 +885,7 @@ function insertTaskInto(newTask, afterId){
 // ---- Template Actions ----
 function addFromTemplate(tid){
   const tm=templates.find(t=>t.id===tid);if(!tm)return;
-  tasks.push({id:nextId++,name:tm.name,estimate:tm.estimate,elapsed:0,status:'idle',color:tm.color,subAccount:tm.subAccount||'none',templateId:tm.id});
+  tasks.push({id:nextId++,name:tm.name,categoryName:tm.categoryName||'none',estimate:tm.estimate,elapsed:0,status:'idle',color:tm.color,subAccount:tm.subAccount||'none',templateId:tm.id});
   save();switchTab('today');renderAll();
 }
 function deleteTmpl(id){templates=templates.filter(t=>t.id!==id);saveT();renderTmplView();}
@@ -869,19 +893,40 @@ function showTmplForm(id){
   const tm=id!==null?templates.find(t=>t.id===id):null;
   tmplEditId=id!==null?id:null;
   tmplEstimate=tm?tm.estimate:15;tmplColor=tm?tm.color:'none';tmplSubAccount=tm?(tm.subAccount||'none'):'none';
-  document.getElementById('tmpl-name-input').value=tm?tm.name:'';
+  tmplCategory=tm?(tm.categoryName||'none'):'none';
+  document.getElementById('tmpl-category').innerHTML=categoryOptionsHTML(tmplCategory);
+  document.getElementById('tmpl-subaccount').value=(tm&&tm.subAccount&&tm.subAccount!=='none')?tm.subAccount:'';
+  renderSubAccountDatalist();
+  const hint=document.getElementById('tmpl-name-hint');
+  if(tm&&(!tm.categoryName||tm.categoryName==='none')){
+    hint.innerHTML=`現在の名前「<strong>${esc(tm.name)}</strong>」（カテゴリ未選択のまま保存すると名前はそのままです）`;
+    hint.style.display='block';
+  }else{
+    hint.style.display='none';
+  }
   document.getElementById('tmpl-form').style.display='block';
   document.getElementById('fab').style.display='none';
   document.getElementById('tmpl-picker').innerHTML=pickerHTML(tmplEstimate,'tmpl');
   document.getElementById('tmpl-color-picker').innerHTML=colorPickerHTML(tmplColor,'tmpl');
-  document.getElementById('tmpl-subaccount-picker').innerHTML=subAccountPickerHTML(tmplSubAccount,'tmpl');
-  setTimeout(()=>document.getElementById('tmpl-name-input').focus(),80);
+  setTimeout(()=>document.getElementById('tmpl-subaccount').focus(),80);
 }
 function hideTmplForm(){document.getElementById('tmpl-form').style.display='none';document.getElementById('fab').style.display='flex';}
 function saveTmpl(){
-  const name=document.getElementById('tmpl-name-input').value.trim();if(!name)return;
-  if(tmplEditId!==null){const tm=templates.find(t=>t.id===tmplEditId);if(tm){tm.name=name;tm.estimate=tmplEstimate;tm.color=tmplColor;tm.subAccount=tmplSubAccount;}}
-  else{templates.push({id:nextTmplId++,name,estimate:tmplEstimate,color:tmplColor,subAccount:tmplSubAccount});}
+  const cat=(tmplCategory&&tmplCategory!=='none')?tmplCategory:'';
+  const sub=document.getElementById('tmpl-subaccount').value.trim();
+  const genName=buildTaskName(cat,sub);
+  if(tmplEditId!==null){
+    const tm=templates.find(t=>t.id===tmplEditId);
+    if(tm){
+      if(genName)tm.name=genName; // カテゴリ未選択の旧テンプレは名前維持
+      tm.categoryName=cat||'none';
+      tm.estimate=tmplEstimate;tm.color=tmplColor;tm.subAccount=sub||'none';
+    }
+  }else{
+    if(!genName)return;
+    templates.push({id:nextTmplId++,name:genName,categoryName:cat||'none',estimate:tmplEstimate,color:tmplColor,subAccount:sub||'none'});
+  }
+  rememberSubAccount(sub);
   saveT();hideTmplForm();renderTmplView();
 }
 
@@ -978,6 +1023,53 @@ function setColorVal(color,ctx){
   else{setTaskColor(parseInt(ctx),color);}
 }
 
+// ---- カテゴリ名（協定・報告・立会など。ユーザーが自由に追加できる可変リスト） ----
+// タスク名は「カテゴリ名 + 補助科目」から自動生成する
+function buildTaskName(cat,sub){
+  const c=(cat&&cat!=='none')?cat:'';
+  const s=(sub&&sub!=='none')?sub:'';
+  if(c&&s)return c+' '+s;
+  return c||s;
+}
+function categoryOptionsHTML(sel){
+  const opts=categories.map(c=>`<option value="${esc(c)}"${sel===c?' selected':''}>${esc(c)}</option>`).join('');
+  return`<option value=""${(!sel||sel==='none')?' selected':''}>カテゴリを選択</option>${opts}<option value="__new__">＋新規カテゴリ…</option>`;
+}
+function onCategorySelect(el,ctx){
+  let val=el.value;
+  if(val==='__new__'){
+    const name=prompt('新しいカテゴリ名を入力してください');
+    const v=name?name.trim():'';
+    if(!v){el.value=(ctx==='add'?(newCategory!=='none'?newCategory:''):(tmplCategory!=='none'?tmplCategory:''));return;}
+    if(!categories.includes(v))categories.push(v);
+    saveCA();
+    val=v;
+    el.innerHTML=categoryOptionsHTML(v);
+  }
+  if(ctx==='add')newCategory=val||'none';
+  else tmplCategory=val||'none';
+}
+function renderSubAccountDatalist(){
+  const dl=document.getElementById('subaccount-list');
+  if(dl)dl.innerHTML=subAccounts.map(s=>`<option value="${esc(s)}">`).join('');
+}
+function rememberSubAccount(v){
+  if(v&&v!=='none'&&!subAccounts.includes(v)){subAccounts.push(v);saveSA();}
+}
+function addCategoryFromManage(){
+  const input=document.getElementById('new-category-input');
+  const v=input.value.trim();if(!v)return;
+  if(!categories.includes(v))categories.push(v);
+  input.value='';
+  saveCA();renderFlowView();
+}
+function deleteCategoryAt(idx){
+  const name=categories[idx];if(name===undefined)return;
+  if(!confirm(`「${name}」を削除しますか？（既にタスクに設定されている分はそのまま残ります）`))return;
+  categories.splice(idx,1);
+  saveCA();renderFlowView();
+}
+
 // ---- 補助科目ピッカー（色とは別の、ユーザーが自由に追加できる可変カテゴリ） ----
 function subAccountPickerHTML(sel,ctx){
   const none=`<button class="preset-btn${(!sel||sel==='none')?' active':''}" onclick="setSubAccountVal(-1,'${ctx}')">なし</button>`;
@@ -987,9 +1079,14 @@ function subAccountPickerHTML(sel,ctx){
 }
 function setSubAccountVal(idx,ctx){
   const val=idx>=0?subAccounts[idx]:'none';
-  if(ctx==='add'){newSubAccount=val;document.getElementById('add-subaccount-picker').innerHTML=subAccountPickerHTML(val,'add');}
-  else if(ctx==='tmpl'){tmplSubAccount=val;document.getElementById('tmpl-subaccount-picker').innerHTML=subAccountPickerHTML(val,'tmpl');}
-  else{const t=tasks.find(t=>t.id===parseInt(ctx));if(t){t.subAccount=val;save();renderAll();}}
+  // タスク一覧のインライン変更（フォーム側の補助科目は自由入力欄に移行済み）
+  const t=tasks.find(t=>t.id===parseInt(ctx));
+  if(t){
+    t.subAccount=val;
+    // カテゴリ名が設定されているタスクは名前も再生成して同期
+    if(t.categoryName&&t.categoryName!=='none')t.name=buildTaskName(t.categoryName,val);
+    save();renderAll();
+  }
 }
 function addNewSubAccountFromPicker(ctx){
   const name=prompt('新しい補助科目名を入力してください');
@@ -1044,29 +1141,41 @@ function switchTab(tab){
 // ---- Add Form ----
 function showAddForm(){
   editTaskId=null;
-  newEstimate=15;newColor='none';newSubAccount='none';
-  document.getElementById('new-name').value='';
+  newEstimate=15;newColor='none';newSubAccount='none';newCategory='none';
+  document.getElementById('new-category').innerHTML=categoryOptionsHTML('none');
+  document.getElementById('new-subaccount').value='';
+  document.getElementById('add-name-hint').style.display='none';
+  renderSubAccountDatalist();
   document.getElementById('add-submit').textContent='追加';
   document.getElementById('add-form').style.display='block';
   document.getElementById('fab').style.display='none';
   document.getElementById('add-picker').innerHTML=pickerHTML(newEstimate,'add');
   document.getElementById('add-color-picker').innerHTML=colorPickerHTML(newColor,'add');
-  document.getElementById('add-subaccount-picker').innerHTML=subAccountPickerHTML(newSubAccount,'add');
-  setTimeout(()=>document.getElementById('new-name').focus(),80);
+  setTimeout(()=>document.getElementById('new-subaccount').focus(),80);
 }
 // 既存タスクの内容編集（並び替えタブの名前タップから）
 function showEditTaskForm(id){
   const t=tasks.find(x=>x.id===id);if(!t)return;
   editTaskId=id;insertAfterId=null;
   newEstimate=t.estimate;newColor=t.color||'none';newSubAccount=t.subAccount||'none';
-  document.getElementById('new-name').value=t.name;
+  newCategory=t.categoryName||'none';
+  document.getElementById('new-category').innerHTML=categoryOptionsHTML(newCategory);
+  document.getElementById('new-subaccount').value=(t.subAccount&&t.subAccount!=='none')?t.subAccount:'';
+  renderSubAccountDatalist();
+  // 旧形式（カテゴリ未設定）のタスクは、カテゴリ未選択のまま保存すれば名前が維持される旨を表示
+  const hint=document.getElementById('add-name-hint');
+  if(!t.categoryName||t.categoryName==='none'){
+    hint.innerHTML=`現在の名前「<strong>${esc(t.name)}</strong>」（カテゴリ未選択のまま保存すると名前はそのままです）`;
+    hint.style.display='block';
+  }else{
+    hint.style.display='none';
+  }
   document.getElementById('add-submit').textContent='保存';
   document.getElementById('add-form').style.display='block';
   document.getElementById('fab').style.display='none';
   document.getElementById('add-picker').innerHTML=pickerHTML(newEstimate,'add');
   document.getElementById('add-color-picker').innerHTML=colorPickerHTML(newColor,'add');
-  document.getElementById('add-subaccount-picker').innerHTML=subAccountPickerHTML(newSubAccount,'add');
-  setTimeout(()=>document.getElementById('new-name').focus(),80);
+  setTimeout(()=>document.getElementById('new-subaccount').focus(),80);
 }
 function hideAddForm(){insertAfterId=null;editTaskId=null;document.getElementById('add-form').style.display='none';document.getElementById('fab').style.display='flex';}
 function onFabClick(){
@@ -1075,16 +1184,7 @@ function onFabClick(){
   else if(currentTab==='reorder'){insertAfterId=null;showAddForm();}
 }
 
-// ---- Inline name edit ----
-function startInlineEdit(id){
-  const el=document.getElementById('name-'+id);if(!el)return;
-  const t=tasks.find(t=>t.id===id);if(!t)return;
-  editingNameId=id; editingNameOriginal=t.name; // 編集中フラグと元の名前を退避
-  el.outerHTML=`<input class="name-input" id="ni-${id}" value="${esc(t.name)}"
-    onblur="commitName(${id},this.value)"
-    onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape'){this.value=editingNameOriginal;this.blur();}">`;
-  setTimeout(()=>{const i=document.getElementById('ni-'+id);if(i){i.focus();}},10);
-}
+// ---- Inline name edit ----（廃止: 名前タップは2分割編集フォームを開く。編集中判定の変数のみ残置）
 
 // ---- Render ----
 function renderAll(){renderHeader();renderTaskList();if(currentTab==='reorder')renderReorderView();if(currentTab==='results')renderResults();if(currentTab==='tmpl')renderTmplView();if(currentTab==='flow')renderFlowView();}
@@ -1120,7 +1220,7 @@ function renderTaskList(){
       <div class="progress-bg"><div class="progress-bar" style="width:${pct}%;background:${bar}"></div></div>
       <div class="card-inner">
         <div class="info">
-          <div class="task-name" id="name-${task.id}" onclick="startInlineEdit(${task.id})">${esc(task.name)}</div>
+          <div class="task-name" id="name-${task.id}" onclick="showEditTaskForm(${task.id})">${esc(task.name)}</div>
           <div class="time-row">
             <button class="estimate-chip" onclick="toggleEstPicker(${task.id})">⏰ ${task.estimate}分</button>
             <span class="elapsed-edit${over?' overrun':''}" onclick="startEditElapsed(${task.id})">実績 ${fmtTime(el)} ✎</span>
@@ -1182,6 +1282,9 @@ function renderTmplView(){
 
 function renderFlowView(){
   const view=document.getElementById('flow-view');
+  const caChips=categories.length
+    ?categories.map((name,i)=>`<span class="preset-btn" style="display:inline-flex;align-items:center;gap:6px">${esc(name)}<button onclick="deleteCategoryAt(${i})" style="border:none;background:none;color:#e74c3c;font-weight:800;cursor:pointer;font-size:14px;line-height:1;padding:0">✕</button></span>`).join('')
+    :'<span style="color:#bbb;font-size:13px">まだありません</span>';
   const saChips=subAccounts.length
     ?subAccounts.map((name,i)=>`<span class="preset-btn" style="display:inline-flex;align-items:center;gap:6px">${esc(name)}<button onclick="deleteSubAccountAt(${i})" style="border:none;background:none;color:#e74c3c;font-weight:800;cursor:pointer;font-size:14px;line-height:1;padding:0">✕</button></span>`).join('')
     :'<span style="color:#bbb;font-size:13px">まだありません</span>';
@@ -1198,6 +1301,12 @@ function renderFlowView(){
       </div>`).join('')
     :'<div class="empty">テンプレートがありません<br>先にテンプレタブで作成してください</div>';
   view.innerHTML=`<div class="result-wrap" style="padding-top:14px">
+    <div class="detail-title">📁 カテゴリ名管理</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">${caChips}</div>
+    <div style="display:flex;gap:8px;margin-bottom:26px">
+      <input class="add-input" id="new-category-input" placeholder="新しいカテゴリ名（協定・報告など）" style="margin-bottom:0" onkeydown="if(event.key==='Enter')addCategoryFromManage()">
+      <button class="btn btn-start" onclick="addCategoryFromManage()" style="width:48px;flex-shrink:0">＋</button>
+    </div>
     <div class="detail-title">🏷 補助科目管理</div>
     <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">${saChips}</div>
     <div style="display:flex;gap:8px;margin-bottom:26px">
@@ -1296,7 +1405,7 @@ function renderResults(){
 function selectDate(d){selectedDate=d;renderResults();}
 
 // ---- Init ----
-load();loadT();loadH();loadSA();loadFL();
+load();loadT();loadH();loadSA();loadFL();loadCA();
 checkBgTime();
 renderAll();
 document.getElementById('clock').textContent=hhMM(new Date());
